@@ -1,0 +1,14 @@
+{
+  "name": "camus",
+  "description": "An elegant wiki for Chinese content",
+  "scripts": {
+    "tsc": "tsc --watch",
+    "dev": "node lib/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
