@@ -1,17 +1,44 @@
 import * as express from 'express'
 import * as path from 'path'
+import { connect } from './db'
+import passport, { FAKE_USER } from './passport'
+
+import * as session from 'express-session'
+import { User } from './models/User'
 
 
-const app = express()
+export interface AppReq extends express.Request {
+  user?: User
+}
 
-const PORT = 3000
+connect().then((db) => {
+  const app = express()
 
-app.use('/static', express.static(path.resolve(__dirname, '../static')))
+  const PORT = 3000
 
-app.get('/', async (req, res) => {
-  res.send('works')
-})
+  app.use(require('express-session')({ secret: 'foo' }))
+  app.use(require('cookie-parser')())
+  app.use(require('body-parser').urlencoded({ extended: false }))
 
-app.listen(PORT, () => {
-  console.log('running at', PORT)
+  app.use('/static', express.static(path.resolve(__dirname, '../static')))
+
+
+  app.use((req, res, next) => {
+    // @ts-expect-error
+    req.user = FAKE_USER
+    next()
+  })
+
+  app.get('/' , async (req: AppReq, res) => {
+    console.log(req.user)
+    res.send('works')
+  })
+
+  app.get('/login', (req, res) => {
+    res.send('hi')
+  })
+
+  app.listen(PORT, () => {
+    console.log('running at', PORT)
+  })
 })
