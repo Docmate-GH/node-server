@@ -12,7 +12,9 @@ export class Doc {
   @Column()
   title: string
 
-  @OneToMany(type => Page, page => page.doc)
+  @OneToMany(type => Page, page => page.doc, {
+    cascade: true
+  })
   pages: Page[]
 
   @CreateDateColumn()

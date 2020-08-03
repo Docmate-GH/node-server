@@ -51,8 +51,12 @@ connect().then((db) => {
   })
   
   app.post('/api/v1/document', doc.create)
+  app.post('/api/v1/document/page', doc.createNewPage)
 
   app.get('/docs/:slug', doc.home)
+
+  app.get('/docs/:docSlug/:fileName', doc.renderFile)
+
 
   app.listen(PORT, () => {
     console.log('running at', PORT)

@@ -7,6 +7,9 @@ export class Page {
   id: string
 
   @Column()
+  slug: string
+
+  @Column()
   index: number
 
   @Column()
