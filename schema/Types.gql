@@ -4,6 +4,7 @@ type Doc {
   slug: String
   createdAt: String
   updatedAt: String
+  deletedAt: String
   pages: [Page]
 }
 
@@ -13,4 +14,6 @@ type Page {
   slug: String
   content: String
   index: Int
+  deletedAt: String
+
 }

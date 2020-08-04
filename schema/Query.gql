@@ -13,6 +13,10 @@ type CreatePageInDocRsp {
   page: Page
 }
 
+input CreatePageInput {
+  title: String,
+  content: String,
+}
 
 input EditPageInput {
   title: String
@@ -20,7 +24,8 @@ input EditPageInput {
 }
 type Mutation {
   createDoc(title: String!, slug: String): Doc
-  createPageInDoc(docId: String!, pageTitle: String!): CreatePageInDocRsp
+  createPageInDoc(docId: String!, input: CreatePageInput): CreatePageInDocRsp
 
   editPage(docId: String!, pageSlug: String!, input: EditPageInput): Page
+  deletePage(docId: String!, pageSlug: String!): Page
 }

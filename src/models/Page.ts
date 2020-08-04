@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, DeleteDateColumn } from "typeorm";
 import { Doc } from "./Doc";
 
 @Entity()
@@ -26,4 +26,10 @@ export class Page {
 
   @UpdateDateColumn()
   updatedAt: Date
+
+  @DeleteDateColumn()
+  deletedAt: Date
+
+  @Column('boolean')
+  isDeleted: boolean
 }

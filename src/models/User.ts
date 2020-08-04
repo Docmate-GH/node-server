@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm'
+import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn, DeleteDateColumn } from 'typeorm'
 
 @Entity()
 export class User {
@@ -17,4 +17,10 @@ export class User {
 
   @CreateDateColumn()
   createdDate: Date
+
+  @DeleteDateColumn()
+  deletedAt: Date
+
+  @Column('boolean')
+  isDeleted: boolean
 }

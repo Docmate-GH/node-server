@@ -33,21 +33,24 @@ export class Resolver {
 
   async createPageInDoc(params: {
     docId: string,
-    pageTitle: string
+    input?: {
+      title?: string
+      content?: string
+    }
   }) {
 
     const doc = await this.docRepo.findOne({ where: { id: params.docId }, relations: ['pages'] })
     const page = new Page()
 
-    page.title = params.pageTitle
+    page.title = params.input?.title || 'Untitled'
+    page.content = params.input?.content || '# Untitled'
     page.slug = nanoid(8)
-    page.content = ''
     page.index = 0
 
     if (doc) {
       doc.pages.push(page)
       const result = await this.docRepo.save(doc)
-      
+
       return {
         doc: result,
         page
@@ -57,7 +60,7 @@ export class Resolver {
     }
   }
 
-  async getDocById (params: {
+  async getDocById(params: {
     docId: string,
     withPages?: boolean
   }) {
@@ -109,6 +112,18 @@ export class Resolver {
       return await this.pageRepo.save(page)
     } else {
       // TODO: page not found
+      return null
+    }
+  }
+
+  async deletePage(params: {
+    docId: string,
+    pageSlug: string,
+  }) {
+    const page = await this.getPage({ docId: params.docId, pageSlug: params.pageSlug })
+    if (page) {
+
+    } else {
       return null
     }
   }
