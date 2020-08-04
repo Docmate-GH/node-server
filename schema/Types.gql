@@ -1,0 +1,16 @@
+type Doc {
+  title: String
+  id: String
+  slug: String
+  createdAt: String
+  updatedAt: String
+  pages: [Page]
+}
+
+type Page {
+  title: String
+  id: String
+  slug: String
+  content: String
+  index: Int
+}

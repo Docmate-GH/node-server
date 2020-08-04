@@ -1,0 +1,26 @@
+type Query {
+  allDocs: [Doc],
+
+  getDocById(docId: String, withPages: Boolean): Doc
+
+  getPage(docId: String!, pageSlug: String!): Page
+
+  getDocBySlug(slug: String): Doc
+}
+
+type CreatePageInDocRsp {
+  doc: Doc,
+  page: Page
+}
+
+
+input EditPageInput {
+  title: String
+  content: String
+}
+type Mutation {
+  createDoc(title: String!, slug: String): Doc
+  createPageInDoc(docId: String!, pageTitle: String!): CreatePageInDocRsp
+
+  editPage(docId: String!, pageSlug: String!, input: EditPageInput): Page
+}

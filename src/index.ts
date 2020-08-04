@@ -9,6 +9,12 @@ import { User } from './models/User'
 import * as doc from './controllers/doc'
 import { Connection } from 'typeorm'
 
+import { graphqlHTTP } from 'express-graphql'
+import { buildSchema } from 'graphql'
+
+import * as fs from 'fs'
+import { Resolver, schema } from './gql'
+
 export interface AppReq extends express.Request {
   user?: User,
   db: Connection
@@ -33,6 +39,13 @@ connect().then((db) => {
   app.use(require('body-parser').urlencoded({ extended: false }))
 
   app.use('/static', express.static(path.resolve(__dirname, '../static')))
+
+  const resolver = new Resolver(db)
+  app.use('/graphql', graphqlHTTP({
+    graphiql: true,
+    rootValue: resolver,
+    schema: schema
+  }))
 
 
   app.use((req: AppReq, res, next) => {

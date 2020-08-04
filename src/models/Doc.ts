@@ -17,6 +17,18 @@ export class Doc {
   })
   pages: Page[]
 
+  /** json stringify */
+  @Column('text', {
+    default: '[]'
+  })
+  nav: string
+
+  /** json stringify */
+  @Column('text', {
+    default: '[]'
+  })
+  sidebar: string
+
   @CreateDateColumn()
   createdAt: Date
 
