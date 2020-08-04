@@ -1,27 +1,6 @@
 import { AppReq } from "..";
 import { Response } from "express";
-import { Doc } from "../models/Doc";
-import { nanoid } from 'nanoid'
-import AppService from "../services";
-import { Page } from "../models/Page";
 import * as path from 'path'
-
-type CreateDocParams = {
-  title: string,
-  slug?: string
-}
-export async function create(req: AppReq, res: Response) {
-
-  let { title, slug } = req.body as CreateDocParams
-  const appService = new AppService(req.db)
-
-  const doc = await appService.createNewDoc(title, slug)
-  console.log(doc)
-  res.json({
-    data: doc
-  })
-}
-
 
 type DocHoemParams = {
   slug: string
@@ -29,9 +8,32 @@ type DocHoemParams = {
 export async function home(req: AppReq, res: Response) {
 
   const { slug } = req.params as DocHoemParams
-  const docRepo = req.db.getRepository(Doc)
 
-  const doc = await docRepo.findOne({where: { slug }, relations: ['pages']})
+  const result = await req.appService.client.query<{
+    doc: {
+      title: string,
+      slug: string,
+      pages: {
+        id: string,
+        title: string,
+        slug: string
+      }[]
+    }[]
+  }>(`
+  query($docSlug: String) {
+    doc(
+      where: { slug: { _eq: $docSlug } }
+    ) {
+     title, slug, pages {
+        id, title, slug
+      }
+    }
+  }
+  `, {
+    docSlug: slug
+  }).toPromise()
+
+  const doc = result.data?.doc[0]
 
   if (doc) {
 
@@ -69,10 +71,33 @@ type RenderFileParams = {
 }
 export async function renderFile(req: AppReq, res: Response) {
   const params = req.params as RenderFileParams
-  const appService = new AppService(req.db)
 
   const pageSlug = path.basename(params.fileName, '.md')
-  const page = await appService.fetchPage(params.docSlug, pageSlug)
+
+  const result = await req.appService.client.query<{
+    page: {
+      id: string,
+      slug: string,
+      content: string,
+      title: string
+    }
+  }>(`
+    query($docSlug: String!, $pageSlug: String!) {
+      page(
+        where: {
+          doc_slug: { _eq: $docSlug },
+          slug: { _eq: $pageSlug }
+        }
+      ) {
+        id, slug, content, title
+      }
+    }
+  `, {
+    docSlug: params.docSlug,
+    pageSlug
+  }).toPromise()
+
+  const page = result.data?.page[0]
 
   if (page) {
     res.type('text/markdown')
@@ -81,39 +106,4 @@ export async function renderFile(req: AppReq, res: Response) {
     res.send('Not found')
   }
 
-}
-
-
-type CreateNewPageParams = {
-  docId: string,
-  page: {
-    title: string,
-    content: string,
-  }
-}
-export async function createNewPage(req: AppReq, res: Response) {
-  const appService = new AppService(req.db)
-
-  const params = req.body as CreateNewPageParams
-
-  const page = new Page()
-  page.title = params.page.title
-  page.content = params.page.content
-  page.slug = nanoid(8)
-  page.index = 0
-
-  const doc = await appService.createNewPageByDocId(params.docId, page)
-
-  if (doc) {
-    res.json({
-      data: {
-        doc, page
-      }
-    })
-  } else {
-    res.status(501)
-    res.json({
-      message: 'create page error'
-    })
-  }
 }
