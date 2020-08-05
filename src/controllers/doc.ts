@@ -3,16 +3,16 @@ import { Response } from "express";
 import * as path from 'path'
 
 type DocHoemParams = {
-  slug: string
+  docId: string
 }
 export async function home(req: AppReq, res: Response) {
 
-  const { slug } = req.params as DocHoemParams
+  const { docId } = req.params as DocHoemParams
 
   const result = await req.appService.client.query<{
     doc: {
       title: string,
-      slug: string,
+      id: string,
       pages: {
         id: string,
         title: string,
@@ -20,17 +20,21 @@ export async function home(req: AppReq, res: Response) {
       }[]
     }[]
   }>(`
-  query($docSlug: String) {
+  query($docId: uuid!) {
     doc(
-      where: { slug: { _eq: $docSlug } }
+      where: { id: { _eq: $docId }, deleted_at: { _is_null: true } }
     ) {
-     title, slug, pages {
+     title, id, pages(
+       where: {
+         deleted_at: { _is_null: true }
+       }
+     ) {
         id, title, slug
       }
     }
   }
   `, {
-    docSlug: slug
+    docId
   }).toPromise()
 
   const doc = result.data?.doc[0]
@@ -47,7 +51,7 @@ export async function home(req: AppReq, res: Response) {
     const docuteParams = {
       title: doc.title,
       target: '#docute',
-      sourcePath: `/docs/${doc.slug}`,
+      sourcePath: `/docs/${doc.id}`,
 
       sidebar
     }
@@ -66,7 +70,7 @@ export async function home(req: AppReq, res: Response) {
 }
 
 type RenderFileParams = {
-  docSlug: string
+  docId: string
   fileName: string
 }
 export async function renderFile(req: AppReq, res: Response) {
@@ -82,10 +86,11 @@ export async function renderFile(req: AppReq, res: Response) {
       title: string
     }
   }>(`
-    query($docSlug: String!, $pageSlug: String!) {
+    query($docId: uuid!, $pageSlug: String!) {
       page(
         where: {
-          doc_slug: { _eq: $docSlug },
+          deleted_at: { _is_null: true },
+          doc_id: { _eq: $docId },
           slug: { _eq: $pageSlug }
         }
       ) {
@@ -93,7 +98,7 @@ export async function renderFile(req: AppReq, res: Response) {
       }
     }
   `, {
-    docSlug: params.docSlug,
+    docId: params.docId,
     pageSlug
   }).toPromise()
 

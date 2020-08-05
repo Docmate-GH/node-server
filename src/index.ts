@@ -19,7 +19,8 @@ const app = express()
 
   const client = createClient({
     url: 'http://localhost:8080/v1/graphql',
-    fetch
+    fetch,
+    requestPolicy: 'network-only'
   })
 
   const appService = new AppService(client)
@@ -53,9 +54,9 @@ const app = express()
     res.send('hi')
   })
 
-  app.get('/docs/:slug', doc.home)
+  app.get('/docs/:docId', doc.home)
 
-  app.get('/docs/:docSlug/:fileName', doc.renderFile)
+  app.get('/docs/:docId/:fileName', doc.renderFile)
 
   app.listen(PORT, () => {
     console.log('running at', PORT)
