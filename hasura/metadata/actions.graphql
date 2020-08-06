@@ -1,2 +1,19 @@
+type Mutation {
+  signUp (
+    input: SignupInput!
+  ): SignUpResult
+}
 
+
+
+
+input SignupInput {
+  email : String!
+  password : String!
+  password_confirm : String!
+}
+
+type SignUpResult {
+  id : uuid
+}
 

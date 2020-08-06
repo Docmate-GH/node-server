@@ -7,6 +7,7 @@ import * as doc from './controllers/doc'
 import AppService from './AppService'
 import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
+import { signUpAction } from './handlers/actions'
 
 export interface AppReq extends express.Request {
   // user?: User,
@@ -57,6 +58,8 @@ const app = express()
   app.get('/docs/:docId', doc.home)
 
   app.get('/docs/:docId/:fileName', doc.renderFile)
+
+  app.post('/handler/actions/signUp', signUpAction)
 
   app.listen(PORT, () => {
     console.log('running at', PORT)

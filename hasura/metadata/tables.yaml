@@ -16,3 +16,6 @@
   - name: doc
     using:
       foreign_key_constraint_on: doc_id
+- table:
+    schema: public
+    name: users
