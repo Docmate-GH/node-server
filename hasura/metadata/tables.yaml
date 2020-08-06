@@ -2,6 +2,13 @@
     schema: public
     name: doc
   array_relationships:
+  - name: doc_teams
+    using:
+      foreign_key_constraint_on:
+        column: doc_id
+        table:
+          schema: public
+          name: doc_team
   - name: pages
     using:
       foreign_key_constraint_on:
@@ -11,6 +18,16 @@
           name: page
 - table:
     schema: public
+    name: doc_team
+  object_relationships:
+  - name: doc
+    using:
+      foreign_key_constraint_on: doc_id
+  - name: team
+    using:
+      foreign_key_constraint_on: team_id
+- table:
+    schema: public
     name: page
   object_relationships:
   - name: doc
@@ -18,4 +35,40 @@
       foreign_key_constraint_on: doc_id
 - table:
     schema: public
+    name: teams
+  array_relationships:
+  - name: team_docs
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          schema: public
+          name: doc_team
+  - name: user_teams
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          schema: public
+          name: user_team
+- table:
+    schema: public
+    name: user_team
+  object_relationships:
+  - name: team
+    using:
+      foreign_key_constraint_on: team_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
     name: users
+  array_relationships:
+  - name: user_teams
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_team
