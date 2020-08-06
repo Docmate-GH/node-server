@@ -1,0 +1,18 @@
+- table:
+    schema: public
+    name: doc
+  array_relationships:
+  - name: pages
+    using:
+      foreign_key_constraint_on:
+        column: doc_id
+        table:
+          schema: public
+          name: page
+- table:
+    schema: public
+    name: page
+  object_relationships:
+  - name: doc
+    using:
+      foreign_key_constraint_on: doc_id
