@@ -9,6 +9,30 @@ export async function home(req: AppReq, res: Response) {
 
   const { docId } = req.params as DocHoemParams
 
+  let defaultPage = null as null | string
+
+  const getDocResult = await req.appService.client.query<{
+    doc_by_pk: {
+      default_page?: string
+    }
+  }>(
+    `
+    query($docId: uuid!) {
+      doc_by_pk(id: $docId) {
+        default_page
+      }
+    }
+    `, { docId }
+  ).toPromise()
+
+  if (!getDocResult.error) {
+    if (getDocResult.data?.doc_by_pk.default_page) {
+      defaultPage = getDocResult.data?.doc_by_pk.default_page
+    }
+  } else {
+    // TODO: getdoc result error
+  }
+
   const result = await req.appService.client.query<{
     doc: {
       title: string,
@@ -41,7 +65,7 @@ export async function home(req: AppReq, res: Response) {
 
   if (doc) {
 
-    const sidebar = doc.pages.map(page => {
+    const sidebar = doc.pages.filter(page => page.slug !== defaultPage).map(page => {
       return {
         title: page.title,
         link: '/' + page.slug
@@ -76,7 +100,31 @@ type RenderFileParams = {
 export async function renderFile(req: AppReq, res: Response) {
   const params = req.params as RenderFileParams
 
-  const pageSlug = path.basename(params.fileName, '.md')
+  let pageSlug = path.basename(params.fileName, '.md')
+
+  if (pageSlug === 'README') {
+    const getDocResult = await req.appService.client.query<{
+      doc_by_pk: {
+        default_page?: string
+      }
+    }>(
+      `
+      query($docId: uuid!) {
+        doc_by_pk(id: $docId) {
+          default_page
+        }
+      }
+      `, { docId: params.docId }
+    ).toPromise()
+
+    if (!getDocResult.error) {
+      if (getDocResult.data?.doc_by_pk.default_page) {
+        pageSlug = getDocResult.data.doc_by_pk.default_page
+      }
+    } else {
+      // TODO: getdoc result error
+    }
+  }
 
   const result = await req.appService.client.query<{
     page: {
@@ -84,9 +132,15 @@ export async function renderFile(req: AppReq, res: Response) {
       slug: string,
       content: string,
       title: string
+    },
+    doc_by_pk: {
+      default_page: string
     }
   }>(`
     query($docId: uuid!, $pageSlug: String!) {
+      doc_by_pk(id: $docId) {
+        default_page
+      },
       page(
         where: {
           deleted_at: { _is_null: true },

@@ -38,12 +38,32 @@
   - role: user
     permission:
       columns:
-      - id
       - created_at
-      - updated_at
+      - default_page
       - deleted_at
-      - title
+      - id
       - team_id
+      - title
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - team:
+            team_users:
+              _exists:
+                _where:
+                  id:
+                    _eq: X-Hasura-User-Id
+                _table:
+                  schema: public
+                  name: users
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - default_page
+      - title
       filter:
         team:
           team_users:
@@ -54,6 +74,7 @@
               _table:
                 schema: public
                 name: users
+      check: null
 - table:
     schema: public
     name: page
@@ -98,16 +119,19 @@
       - deleted_at
       - doc_id
       filter:
-        doc:
-          team:
-            team_users:
-              _exists:
-                _where:
-                  id:
-                    _eq: X-Hasura-User-Id
-                _table:
-                  schema: public
-                  name: users
+        _and:
+        - doc:
+            team:
+              team_users:
+                _exists:
+                  _where:
+                    id:
+                      _eq: X-Hasura-User-Id
+                  _table:
+                    schema: public
+                    name: users
+        - deleted_at:
+            _is_null: true
   update_permissions:
   - role: user
     permission:
