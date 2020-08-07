@@ -1,4 +1,11 @@
 type Mutation {
+  createTeam (
+    input: CreateTeamInput!
+  ): CreateTeamResult
+}
+
+
+type Mutation {
   signIn (
     input: SignInInput!
   ): SignInResult
@@ -25,6 +32,10 @@ input SignInInput {
   password : String!
 }
 
+input CreateTeamInput {
+  title : String!
+}
+
 type SignUpResult {
   id : uuid
 }
@@ -35,5 +46,9 @@ type SignInResult {
   id : uuid
   email : String
   avatar : String
+}
+
+type CreateTeamResult {
+  teamId : uuid
 }
 

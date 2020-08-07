@@ -177,15 +177,9 @@
   insert_permissions:
   - role: user
     permission:
-      check:
-        team_users:
-          _exists:
-            _where:
-              id:
-                _eq: X-Hasura-User-Id
-            _table:
-              schema: public
-              name: users
+      check: {}
+      set:
+        master: x-hasura-User-Id
       columns:
       - is_personal
       - title

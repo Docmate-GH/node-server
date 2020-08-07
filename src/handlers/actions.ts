@@ -1,9 +1,12 @@
 import { AppReq } from "..";
 import { Response } from "express";
 import { createHash } from 'crypto'
+import AppService from "../AppService";
 
 interface HasuraActionBody<Input> {
-  session_variables: any,
+  session_variables: {
+    'x-hasura-user-id': string
+  },
   input: Input,
   action: {
     name: string
@@ -84,44 +87,12 @@ export async function signUpAction(req: AppReq, response: Response) {
 
         // create team for user
 
-        const createTeamResult = await req.appService.client.query<{
-          insert_teams_one: {
-            id: string
-          }
-        }>(`
-          mutation($title: String!, $master: uuid!) {
-            insert_teams_one(object: {
-              master: $master,
-              title: $title
-            }) {
-              id
-            }
-          }
-        `, {
-          title: defaultUserName,
-          master: createUserResult.data?.insert_users_one.id
-        }).toPromise()
+        const createTeamResult = await req.appService.createTeam(defaultUserName, createUserResult.data!.insert_users_one.id, true)
 
         if (!createTeamResult.error) {
 
           // join team
-          const joinTeamResult = await req.appService.client.query<{
-            insert_user_team_one: {
-              team_id: string, user_id: string
-            }
-          }>(`
-            mutation($teamId: uuid!, $userId: uuid!) {
-              insert_user_team_one(object: {
-                team_id: $teamId,
-                user_id: $userId
-              }) {
-                user_id, team_id
-              }
-            }
-          `, {
-            teamId: createTeamResult.data?.insert_teams_one.id,
-            userId: createUserResult.data?.insert_users_one.id
-          }).toPromise()
+          const joinTeamResult = await req.appService.joinTeam(createTeamResult.data!.insert_teams_one.id, createUserResult.data!.insert_users_one.id)
 
           if (!joinTeamResult.error) {
             response.json({
@@ -222,6 +193,42 @@ export async function signinAction(req: AppReq, response: Response) {
     response.json({
       code: '400',
       message: 'Unknown error'
+    })
+  }
+}
+
+export async function createTeam(req: AppReq, response: Response) {
+  const { input: { input: { title } }, session_variables } = req.body as HasuraActionBody<{
+    input: {
+      title: string
+    }
+  }>
+
+  const createTeamResult = await req.appService.createTeam(title, session_variables['x-hasura-user-id'])
+
+  if (!createTeamResult.error) {
+    const teamId = createTeamResult.data!.insert_teams_one.id
+
+    // join team
+    const joinTeamResult = await req.appService.joinTeam(teamId, session_variables["x-hasura-user-id"])
+
+    if (!joinTeamResult.error) {
+      response.json({
+        teamId: joinTeamResult.data!.insert_user_team_one.team_id
+      })
+    } else {
+      // TODO: join team error
+      response.status(400)
+      response.json({
+        message: 'join team error'
+      })
+    }
+
+  } else {
+    // TODO: create team error
+    response.status(400)
+    response.json({
+      message: 'create team error'
     })
   }
 }

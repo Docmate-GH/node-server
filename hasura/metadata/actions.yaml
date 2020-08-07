@@ -1,4 +1,10 @@
 actions:
+- name: createTeam
+  definition:
+    kind: synchronous
+    handler: http://host.docker.internal:3000/handler/actions/createTeam
+  permissions:
+  - role: user
 - name: signIn
   definition:
     kind: synchronous
@@ -16,7 +22,9 @@ custom_types:
   input_objects:
   - name: SignupInput
   - name: SignInInput
+  - name: CreateTeamInput
   objects:
   - name: SignUpResult
   - name: SignInResult
+  - name: CreateTeamResult
   scalars: []

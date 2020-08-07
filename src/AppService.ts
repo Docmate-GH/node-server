@@ -33,4 +33,46 @@ export default class AppService {
 
     return token
   }
+
+  createTeam(title: string, masterUserId: string, isPersonal = false) {
+    return this.client.query<{
+      insert_teams_one: {
+        id: string
+      }
+    }>(`
+      mutation($title: String!, $master: uuid!, $isPersonal: Boolean) {
+        insert_teams_one(object: {
+          master: $master,
+          title: $title,
+          is_personal: $isPersonal
+        }) {
+          id
+        }
+      }
+    `, {
+      title,
+      master: masterUserId,
+      isPersonal
+    }).toPromise()
+  }
+
+  joinTeam(teamId: string, userId: string) {
+    return this.client.mutation<{
+      insert_user_team_one: {
+        team_id: string, user_id: string
+      }
+    }>(`
+      mutation($teamId:uuid!, $userId:uuid!) {
+        insert_user_team_one(object:{
+          team_id:$teamId,
+          user_id:$userId
+        }) {
+          team_id, user_id
+        }
+      }
+  `, {
+    teamId,
+    userId
+  }).toPromise()
+  }
 }
