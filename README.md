@@ -26,3 +26,7 @@ npm run tsc
 # node server
 npm run dev
 ```
+
+## TODO
+
+- [ ] env: JWT private key

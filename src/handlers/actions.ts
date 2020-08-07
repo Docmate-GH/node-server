@@ -1,6 +1,6 @@
 import { AppReq } from "..";
 import { Response } from "express";
-
+import { createHash } from 'crypto'
 
 interface HasuraActionBody<Input> {
   session_variables: any,
@@ -147,4 +147,81 @@ export async function signUpAction(req: AppReq, response: Response) {
     }
   }
 
+}
+
+
+
+export async function signinAction(req: AppReq, response: Response) {
+  const { input: { input: { email, password } } } = req.body as HasuraActionBody<{
+    input: {
+      email: string,
+      password: string
+    }
+  }>
+
+  const findUserByEmailResult = await req.appService.client.query<{
+    users: {
+      id: string,
+      password: string,
+      username: string,
+      email: string
+    }[]
+  }>(`
+    query($email: String!) {
+      users(
+        where: {
+          email: { _eq: $email },
+          deleted_at: { _is_null: true }
+        }
+      ) {
+        id, password, username, email
+      }
+    }
+  `, {
+    email
+  }).toPromise()
+
+  if (!findUserByEmailResult.error) {
+    if (findUserByEmailResult.data!.users.length > 0) {
+      const user = findUserByEmailResult.data!.users[0]
+      if (await req.appService.comparePassword(password, user.password)) {
+
+        response.json({
+          token: req.appService.getJWT({
+            name: user.username
+          }, {
+            'x-hasura-user-id': user.id,
+            'x-hasura-default-role': "user",
+          }),
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          avatar: createHash('md5').update(user.email.toLowerCase()).digest('hex')
+        })
+      } else {
+        // password not correct
+        response.status(400)
+        response.json({
+          code: '400',
+          message: 'password not correct'
+        })
+      }
+
+    } else {
+      // TODO: user not exist
+      response.status(404)
+      response.json({
+        code: '404',
+        message: 'Email not exist'
+      })
+    }
+  } else {
+    // TODO: find user error
+    console.log(findUserByEmailResult.error)
+    response.status(400)
+    response.json({
+      code: '400',
+      message: 'Unknown error'
+    })
+  }
 }

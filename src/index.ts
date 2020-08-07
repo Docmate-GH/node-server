@@ -7,7 +7,7 @@ import * as doc from './controllers/doc'
 import AppService from './AppService'
 import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
-import { signUpAction } from './handlers/actions'
+import { signUpAction, signinAction } from './handlers/actions'
 
 export interface AppReq extends express.Request {
   // user?: User,
@@ -21,7 +21,12 @@ const app = express()
   const client = createClient({
     url: 'http://localhost:8080/v1/graphql',
     fetch,
-    requestPolicy: 'network-only'
+    requestPolicy: 'network-only',
+    fetchOptions: {
+      headers: {
+        'x-hasura-admin-secret': 'myadminsecretkey'
+      }
+    }
   })
 
   const appService = new AppService(client)
@@ -60,6 +65,8 @@ const app = express()
   app.get('/docs/:docId/:fileName', doc.renderFile)
 
   app.post('/handler/actions/signUp', signUpAction)
+  app.post('/handler/actions/signIn', signinAction)
+
 
   app.listen(PORT, () => {
     console.log('running at', PORT)

@@ -1,12 +1,22 @@
 actions:
+- name: signIn
+  definition:
+    kind: synchronous
+    handler: http://host.docker.internal:3000/handler/actions/signIn
+  permissions:
+  - role: guest
 - name: signUp
   definition:
     kind: synchronous
     handler: http://host.docker.internal:3000/handler/actions/signUp
+  permissions:
+  - role: guest
 custom_types:
   enums: []
   input_objects:
   - name: SignupInput
+  - name: SignInInput
   objects:
   - name: SignUpResult
+  - name: SignInResult
   scalars: []

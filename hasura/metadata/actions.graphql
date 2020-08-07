@@ -1,4 +1,11 @@
 type Mutation {
+  signIn (
+    input: SignInInput!
+  ): SignInResult
+}
+
+
+type Mutation {
   signUp (
     input: SignupInput!
   ): SignUpResult
@@ -13,7 +20,20 @@ input SignupInput {
   password_confirm : String!
 }
 
+input SignInInput {
+  email : String!
+  password : String!
+}
+
 type SignUpResult {
   id : uuid
+}
+
+type SignInResult {
+  token : String
+  username : String
+  id : uuid
+  email : String
+  avatar : String
 }
 

@@ -1,14 +1,11 @@
 - table:
     schema: public
     name: doc
-  array_relationships:
-  - name: doc_teams
+  object_relationships:
+  - name: team
     using:
-      foreign_key_constraint_on:
-        column: doc_id
-        table:
-          schema: public
-          name: doc_team
+      foreign_key_constraint_on: team_id
+  array_relationships:
   - name: pages
     using:
       foreign_key_constraint_on:
@@ -16,16 +13,47 @@
         table:
           schema: public
           name: page
-- table:
-    schema: public
-    name: doc_team
-  object_relationships:
-  - name: doc
-    using:
-      foreign_key_constraint_on: doc_id
-  - name: team
-    using:
-      foreign_key_constraint_on: team_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        team:
+          team_users:
+            _exists:
+              _where:
+                id:
+                  _eq: X-Hasura-User-Id
+              _table:
+                schema: public
+                name: users
+      columns:
+      - id
+      - created_at
+      - updated_at
+      - deleted_at
+      - title
+      - team_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - created_at
+      - updated_at
+      - deleted_at
+      - title
+      - team_id
+      filter:
+        team:
+          team_users:
+            _exists:
+              _where:
+                id:
+                  _eq: X-Hasura-User-Id
+              _table:
+                schema: public
+                name: users
 - table:
     schema: public
     name: page
@@ -33,24 +61,135 @@
   - name: doc
     using:
       foreign_key_constraint_on: doc_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        doc:
+          team:
+            team_users:
+              _exists:
+                _where:
+                  id:
+                    _eq: X-Hasura-User-Id
+                _table:
+                  schema: public
+                  name: users
+      columns:
+      - content
+      - slug
+      - title
+      - created_at
+      - deleted_at
+      - updated_at
+      - doc_id
+      - id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - created_at
+      - updated_at
+      - slug
+      - content
+      - title
+      - deleted_at
+      - doc_id
+      filter:
+        doc:
+          team:
+            team_users:
+              _exists:
+                _where:
+                  id:
+                    _eq: X-Hasura-User-Id
+                _table:
+                  schema: public
+                  name: users
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - content
+      - slug
+      - title
+      - created_at
+      - deleted_at
+      - updated_at
+      - doc_id
+      - id
+      filter:
+        doc:
+          team:
+            team_users:
+              _exists:
+                _where:
+                  id:
+                    _eq: X-Hasura-User-Id
+                _table:
+                  schema: public
+                  name: users
+      check: null
 - table:
     schema: public
     name: teams
   array_relationships:
-  - name: team_docs
+  - name: docs
     using:
       foreign_key_constraint_on:
         column: team_id
         table:
           schema: public
-          name: doc_team
-  - name: user_teams
+          name: doc
+  - name: team_users
     using:
       foreign_key_constraint_on:
         column: team_id
         table:
           schema: public
           name: user_team
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        team_users:
+          _exists:
+            _where:
+              id:
+                _eq: X-Hasura-User-Id
+            _table:
+              schema: public
+              name: users
+      columns:
+      - is_personal
+      - title
+      - created_at
+      - deleted_at
+      - updated_at
+      - id
+      - master
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - master
+      - title
+      - created_at
+      - updated_at
+      - deleted_at
+      filter:
+        team_users:
+          _exists:
+            _where:
+              id:
+                _eq: X-Hasura-User-Id
+            _table:
+              schema: public
+              name: users
 - table:
     schema: public
     name: user_team
@@ -61,6 +200,15 @@
   - name: user
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - team_id
+      - user_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: users
