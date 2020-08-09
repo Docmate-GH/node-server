@@ -22,9 +22,12 @@ services:
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       ## uncomment next line to set an admin secret
-      HASURA_GRAPHQL_ADMIN_SECRET: ${DOCMATE_HASURA_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: guest
+
+
+      HASURA_GRAPHQL_ADMIN_SECRET: ${DOCMATE_HASURA_SECRET}
       HASURA_GRAPHQL_JWT_SECRET: ${DOCMATE_JWT_SECRET}
+      ACTION_HANDLER_URL: ${ACTION_HANDLER_URL}
 volumes:
   db_data:
 

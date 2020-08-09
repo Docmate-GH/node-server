@@ -2,31 +2,31 @@ actions:
 - name: createTeam
   definition:
     kind: synchronous
-    handler: http://host.docker.internal:3000/handler/actions/createTeam
+    handler: '{{ACTION_HANDLER_URL}}/handler/actions/createTeam'
   permissions:
   - role: user
 - name: joinTeam
   definition:
     kind: synchronous
-    handler: http://host.docker.internal:3000/handler/actions/joinTeam
+    handler: '{{ACTION_HANDLER_URL}}/handler/actions/joinTeam'
   permissions:
   - role: user
 - name: revokeInviteId
   definition:
     kind: synchronous
-    handler: http://host.docker.internal:3000/handler/actions/revokeInviteId
+    handler: '{{ACTION_HANDLER_URL}}/handler/actions/revokeInviteId'
   permissions:
   - role: user
 - name: signIn
   definition:
     kind: synchronous
-    handler: http://host.docker.internal:3000/handler/actions/signIn
+    handler: '{{ACTION_HANDLER_URL}}/handler/actions/signIn'
   permissions:
   - role: guest
 - name: signUp
   definition:
     kind: synchronous
-    handler: http://host.docker.internal:3000/handler/actions/signUp
+    handler: '{{ACTION_HANDLER_URL}}/handler/actions/signUp'
   permissions:
   - role: guest
 custom_types:
