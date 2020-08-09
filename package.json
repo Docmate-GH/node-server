@@ -4,6 +4,7 @@
   "scripts": {
     "tsc": "tsc --watch",
     "dev": "node lib/index.js",
+    "build": "tsc",
     "console": "hasura console --project hasura",
     "start": "NODE_ENV=prod node lib/index.js"
   },

@@ -9,6 +9,8 @@ import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
 import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from './handlers/actions'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export interface AppReq extends express.Request {
   // user?: User,
   appService: AppService
@@ -16,7 +18,7 @@ export interface AppReq extends express.Request {
 
 const app = express()
 
-const PORT = 3000
+const PORT = isProd ? 80 : 3000
 
 const client = createClient({
   url: 'http://localhost:8080/v1/graphql',
