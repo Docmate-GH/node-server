@@ -11,6 +11,12 @@ actions:
     handler: http://host.docker.internal:3000/handler/actions/joinTeam
   permissions:
   - role: user
+- name: revokeInviteId
+  definition:
+    kind: synchronous
+    handler: http://host.docker.internal:3000/handler/actions/revokeInviteId
+  permissions:
+  - role: user
 - name: signIn
   definition:
     kind: synchronous
@@ -34,4 +40,5 @@ custom_types:
   - name: SignInResult
   - name: CreateTeamResult
   - name: JoinTeamResult
+  - name: RevokeInviteIdResult
   scalars: []

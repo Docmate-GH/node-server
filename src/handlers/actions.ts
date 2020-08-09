@@ -2,6 +2,7 @@ import { AppReq } from "..";
 import { Response } from "express";
 import { createHash } from 'crypto'
 import AppService from "../AppService";
+import { v4 as uuid } from 'uuid'
 
 interface HasuraActionBody<Input> {
   session_variables: {
@@ -299,6 +300,73 @@ export async function joinTeam(req: AppReq, response: Response) {
     response.json({
       success: false,
       message: 'Invalid invite link'
+    })
+  }
+}
+
+export async function revokeInviteId(req: AppReq, response: Response) {
+  const { session_variables, input: { teamId } } = req.body as HasuraActionBody<{
+    teamId: string
+  }>
+
+  const getTeamResult = await req.appService.client.query<{
+    teams_by_pk: {
+      master: string
+    }
+  }>(`
+    query($teamId: uuid!) {
+      teams_by_pk(id: $teamId) {
+        master
+      }
+    }
+  `, { teamId }).toPromise()
+
+
+  if (getTeamResult.data) {
+    if (getTeamResult.data.teams_by_pk.master === session_variables["x-hasura-user-id"]) {
+      const newId = uuid()
+
+      const updateResult = await req.appService.client.mutation<{
+        update_teams_by_pk: {
+          invite_id: string
+        }
+      }>(`
+        mutation($teamId: uuid!, $inviteId: uuid!) {
+          update_teams_by_pk(pk_columns: {
+            id: $teamId
+          }, _set:{
+            invite_id: $inviteId
+          }) {
+            invite_id
+          }
+        }
+      `, {
+        teamId,
+        inviteId: newId
+      }).toPromise()
+
+      if (!updateResult.error) {
+        response.json({
+          code: updateResult.data!.update_teams_by_pk.invite_id
+        })
+      } else {
+        // TODO:
+        response.status(400)
+        response.json({
+          message: 'Update errror'
+        })
+      }
+    } else {
+      response.status(403)
+      response.json({
+        message: 'No permission'
+      })
+    }
+  } else {
+    // TODO:
+    response.status(400)
+    response.json({
+
     })
   }
 }

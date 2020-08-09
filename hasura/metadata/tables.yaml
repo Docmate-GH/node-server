@@ -193,6 +193,17 @@
         - team_users:
             user_id:
               _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - master
+      - title
+      filter:
+        _and:
+        - master:
+            _eq: X-Hasura-User-Id
+      check: null
 - table:
     schema: public
     name: user_team

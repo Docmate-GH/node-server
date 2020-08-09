@@ -13,6 +13,13 @@ type Mutation {
 
 
 type Mutation {
+  revokeInviteId (
+    teamId: uuid!
+  ): RevokeInviteIdResult
+}
+
+
+type Mutation {
   signIn (
     input: SignInInput!
   ): SignInResult
@@ -62,5 +69,9 @@ type CreateTeamResult {
 type JoinTeamResult {
   success : Boolean
   teamId : uuid
+}
+
+type RevokeInviteIdResult {
+  code : String
 }
 
