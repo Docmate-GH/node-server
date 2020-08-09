@@ -4,7 +4,8 @@
   "scripts": {
     "tsc": "tsc --watch",
     "dev": "node lib/index.js",
-    "console": "hasura console --project hasura"
+    "console": "hasura console --project hasura",
+    "start": "NODE_ENV=prod node lib/index.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.7",
