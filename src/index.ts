@@ -7,7 +7,7 @@ import * as doc from './controllers/doc'
 import AppService from './AppService'
 import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
-import { signUpAction, signinAction, createTeam } from './handlers/actions'
+import { signUpAction, signinAction, createTeam, joinTeam } from './handlers/actions'
 
 export interface AppReq extends express.Request {
   // user?: User,
@@ -67,6 +67,7 @@ const app = express()
   app.post('/handler/actions/signUp', signUpAction)
   app.post('/handler/actions/signIn', signinAction)
   app.post('/handler/actions/createTeam', createTeam)
+  app.post('/handler/actions/joinTeam', joinTeam)
 
 
 

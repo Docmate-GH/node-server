@@ -232,3 +232,73 @@ export async function createTeam(req: AppReq, response: Response) {
     })
   }
 }
+
+export async function joinTeam(req: AppReq, response: Response) {
+  const { input: { inviteId }, session_variables } = req.body as HasuraActionBody<{
+    inviteId: string
+  }>
+
+  const findTeamByInviteId = await req.appService.client.query<{
+    teams: {
+      id: string
+    }[]
+  }>(`
+    query($inviteId: uuid!) {
+      teams(where:{
+        invite_id: { _eq: $inviteId},
+        deleted_at: { _is_null: true }
+      }) {
+        id
+      }
+    }
+  `, {
+    inviteId
+  }).toPromise()
+
+  if (findTeamByInviteId.error) {
+    // TODO:
+    response.status(400)
+    response.json({
+      message: 'find team error'
+    })
+    return
+  }
+
+  if (findTeamByInviteId.data!.teams.length > 0) {
+    const team = findTeamByInviteId.data!.teams[0]
+
+    const joinTeamResult = await req.appService.client.mutation(`
+      mutation($teamId: uuid!, $userId: uuid!) {
+        insert_user_team_one(object:{
+          user_id: $userId,
+          team_id: $teamId
+        }) {
+          user_id
+        }
+      }
+    `, {
+      teamId: team.id,
+      userId: session_variables["x-hasura-user-id"]
+    }).toPromise()
+
+    if (joinTeamResult.error) {
+      // TODO: error
+      response.status(400)
+      response.json({
+        message: 'join team error'
+      })
+    } else {
+      response.json({
+        success: true,
+        teamId: team.id
+      })
+    }
+
+  } else {
+    response.status(400)
+    response.json({
+      success: false,
+      message: 'Invalid invite link'
+    })
+  }
+}

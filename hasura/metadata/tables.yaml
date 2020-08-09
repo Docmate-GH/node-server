@@ -174,40 +174,25 @@
         table:
           schema: public
           name: user_team
-  insert_permissions:
-  - role: user
-    permission:
-      check: {}
-      set:
-        master: x-hasura-User-Id
-      columns:
-      - is_personal
-      - title
-      - created_at
-      - deleted_at
-      - updated_at
-      - id
-      - master
-      backend_only: false
   select_permissions:
   - role: user
     permission:
       columns:
+      - created_at
+      - deleted_at
       - id
+      - invite_id
+      - is_personal
       - master
       - title
-      - created_at
       - updated_at
-      - deleted_at
       filter:
-        team_users:
-          _exists:
-            _where:
-              id:
-                _eq: X-Hasura-User-Id
-            _table:
-              schema: public
-              name: users
+        _or:
+        - master:
+            _eq: X-Hasura-User-Id
+        - team_users:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: user_team
@@ -225,8 +210,22 @@
       - team_id
       - user_id
       filter:
-        user_id:
-          _eq: X-Hasura-User-Id
+        _or:
+        - team:
+            master:
+              _eq: X-Hasura-User-Id
+        - team:
+            team_users:
+              user_id:
+                _eq: X-Hasura-User-Id
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        _and:
+        - team:
+            master:
+              _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: users
@@ -238,3 +237,18 @@
         table:
           schema: public
           name: user_team
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - email
+      - id
+      - username
+      filter:
+        _or:
+        - id:
+            _eq: X-Hasura-User-Id
+        - user_teams:
+            team:
+              master:
+                _eq: X-Hasura-User-Id

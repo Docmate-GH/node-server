@@ -5,6 +5,12 @@ actions:
     handler: http://host.docker.internal:3000/handler/actions/createTeam
   permissions:
   - role: user
+- name: joinTeam
+  definition:
+    kind: synchronous
+    handler: http://host.docker.internal:3000/handler/actions/joinTeam
+  permissions:
+  - role: user
 - name: signIn
   definition:
     kind: synchronous
@@ -27,4 +33,5 @@ custom_types:
   - name: SignUpResult
   - name: SignInResult
   - name: CreateTeamResult
+  - name: JoinTeamResult
   scalars: []
