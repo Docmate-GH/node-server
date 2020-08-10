@@ -15,7 +15,6 @@ export default class AppService {
 
   async comparePassword(psw: string, hash: string) {
     const matched = await bcrypt.compare(psw, hash)
-    console.log('comparing', psw, hash, matched)
     return matched
   }
 
