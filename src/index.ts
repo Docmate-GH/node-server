@@ -9,6 +9,7 @@ import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
 import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from './handlers/actions'
 
+const Sentry = require('@sentry/node');
 require('dotenv').config()
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -16,6 +17,11 @@ const isProd = process.env.NODE_ENV === 'production'
 export interface AppReq extends express.Request {
   // user?: User,
   appService: AppService
+}
+
+// sentry
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN })
 }
 
 const app = express()

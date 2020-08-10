@@ -3,6 +3,7 @@ import { Response } from "express";
 import { createHash } from 'crypto'
 import AppService from "../AppService";
 import { v4 as uuid } from 'uuid'
+import { logError } from "../logger";
 
 interface HasuraActionBody<Input> {
   session_variables: {
@@ -16,7 +17,7 @@ interface HasuraActionBody<Input> {
 
 export async function signUpAction(req: AppReq, response: Response) {
 
-  const { input: { input: { email, password, password_confirm } } } = req.body as HasuraActionBody<{
+  const { input: { input: { email, password, password_confirm } }, session_variables } = req.body as HasuraActionBody<{
     input: {
       email: string,
       password: string,
@@ -100,17 +101,15 @@ export async function signUpAction(req: AppReq, response: Response) {
               id: createUserResult.data!.insert_users_one.id
             })
           } else {
-            // TODO: join team error
+            logError(joinTeamResult.error, session_variables["x-hasura-user-id"])
           }
         } else {
-          // TODO: create team error
-          console.log(createTeamResult.error)
+          logError(createTeamResult.error, session_variables["x-hasura-user-id"])
         }
 
       } else {
-        console.log(createUserResult.error)
         response.status(400)
-        // TODO: create user error
+        logError(createUserResult.error, session_variables["x-hasura-user-id"])
         response.json({
           message: 'Unknown error'
         })
@@ -124,7 +123,7 @@ export async function signUpAction(req: AppReq, response: Response) {
 
 
 export async function signinAction(req: AppReq, response: Response) {
-  const { input: { input: { email, password } } } = req.body as HasuraActionBody<{
+  const { input: { input: { email, password } }, session_variables } = req.body as HasuraActionBody<{
     input: {
       email: string,
       password: string
@@ -175,12 +174,11 @@ export async function signinAction(req: AppReq, response: Response) {
         response.status(400)
         response.json({
           code: '400',
-          message: 'password not correct'
+          message: 'Password not correct'
         })
       }
 
     } else {
-      // TODO: user not exist
       response.status(404)
       response.json({
         code: '404',
@@ -188,8 +186,7 @@ export async function signinAction(req: AppReq, response: Response) {
       })
     }
   } else {
-    // TODO: find user error
-    console.log(findUserByEmailResult.error)
+    logError(findUserByEmailResult.error, session_variables["x-hasura-user-id"])
     response.status(400)
     response.json({
       code: '400',
@@ -218,7 +215,7 @@ export async function createTeam(req: AppReq, response: Response) {
         teamId: joinTeamResult.data!.insert_user_team_one.team_id
       })
     } else {
-      // TODO: join team error
+      logError(joinTeamResult.error, session_variables["x-hasura-user-id"])
       response.status(400)
       response.json({
         message: 'join team error'
@@ -226,7 +223,7 @@ export async function createTeam(req: AppReq, response: Response) {
     }
 
   } else {
-    // TODO: create team error
+    logError(createTeamResult.error, session_variables["x-hasura-user-id"])
     response.status(400)
     response.json({
       message: 'create team error'
@@ -257,7 +254,8 @@ export async function joinTeam(req: AppReq, response: Response) {
   }).toPromise()
 
   if (findTeamByInviteId.error) {
-    // TODO:
+    logError(findTeamByInviteId.error, session_variables["x-hasura-user-id"])
+
     response.status(400)
     response.json({
       message: 'find team error'
@@ -283,7 +281,7 @@ export async function joinTeam(req: AppReq, response: Response) {
     }).toPromise()
 
     if (joinTeamResult.error) {
-      // TODO: error
+      logError(joinTeamResult.error, session_variables["x-hasura-user-id"])
       response.status(400)
       response.json({
         message: 'join team error'
@@ -350,7 +348,7 @@ export async function revokeInviteId(req: AppReq, response: Response) {
           code: updateResult.data!.update_teams_by_pk.invite_id
         })
       } else {
-        // TODO:
+        logError(updateResult.error, session_variables["x-hasura-user-id"])
         response.status(400)
         response.json({
           message: 'Update errror'
@@ -363,7 +361,8 @@ export async function revokeInviteId(req: AppReq, response: Response) {
       })
     }
   } else {
-    // TODO:
+    logError(getTeamResult.error, session_variables["x-hasura-user-id"])
+
     response.status(400)
     response.json({
 
