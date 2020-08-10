@@ -9,6 +9,8 @@ import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
 import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from './handlers/actions'
 
+require('dotenv').config()
+
 const isProd = process.env.NODE_ENV === 'production'
 
 export interface AppReq extends express.Request {
@@ -26,7 +28,7 @@ const client = createClient({
   requestPolicy: 'network-only',
   fetchOptions: {
     headers: {
-      'x-hasura-admin-secret': 'myadminsecretkey'
+      'x-hasura-admin-secret': process.env.DOCMATE_HASURA_SECRET!
     }
   }
 })

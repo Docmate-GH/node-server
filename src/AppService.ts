@@ -21,7 +21,7 @@ export default class AppService {
 
 
   getJWT(body, claims) {
-    const privateKey = `6&#X6((t>:^v>CM3g5NYfY63Z4=KN4Hx`
+    const privateKey = (JSON.parse(process.env.DOCMATE_JWT_SECRET!)).key
 
     const token = jwt.sign({
       ...body,
