@@ -69,7 +69,7 @@ app.post('/handler/actions/joinTeam', joinTeam)
 app.post('/handler/actions/revokeInviteId', revokeInviteId)
 
 
-app.get('/*', async (req: AppReq, res) => {
+app.get('*', async (req: AppReq, res) => {
   res.render('index.html')
 })
 
