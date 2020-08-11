@@ -11,6 +11,10 @@ import { createClient } from '@urql/core'
 import * as fetch from 'node-fetch'
 import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from './handlers/actions'
 
+import uploadController from './controllers/upload'
+import { imagePath, isProEnabled, uploadMiddleware, proPlanGuard } from './utils'
+
+
 const Sentry = require('@sentry/node');
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -58,6 +62,8 @@ app.use(require('body-parser').urlencoded({ extended: false }))
 app.use(require('morgan')(isProd ? 'combined' : 'dev'))
 
 app.use('/static', express.static(path.resolve(__dirname, '../static')))
+app.use('/images', express.static(imagePath))
+
 
 app.use((req: AppReq, res, next) => {
   // req.user = FAKE_USER
@@ -79,6 +85,7 @@ app.post('/handler/actions/createTeam', createTeam)
 app.post('/handler/actions/joinTeam', joinTeam)
 app.post('/handler/actions/revokeInviteId', revokeInviteId)
 
+app.post('/api/v1/upload', proPlanGuard, uploadMiddleware.single('image'), uploadController)
 
 app.get('*', async (req: AppReq, res) => {
   res.render('index.html')

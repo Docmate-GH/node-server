@@ -33,6 +33,12 @@ export default class AppService {
     return token
   }
 
+  parseJWT(jwtString: string) {
+    const privateKey = (JSON.parse(process.env.DOCMATE_JWT_SECRET!)).key
+
+    return jwt.verify(jwtString, privateKey)
+  }
+
   createTeam(title: string, masterUserId: string, isPersonal = false) {
     return this.client.query<{
       insert_teams_one: {
@@ -55,6 +61,22 @@ export default class AppService {
     }).toPromise()
   }
 
+  getUserPlan(userId: string) {
+    return this.client.query<{
+      users_by_pk: {
+        plan: string
+      }
+    }>(`
+      query($userId: uuid!) {
+        users_by_pk(id: $userId) {
+          plan
+        }
+      }
+    `, {
+      userId
+    })
+  }
+
   joinTeam(teamId: string, userId: string) {
     return this.client.mutation<{
       insert_user_team_one: {
@@ -70,8 +92,8 @@ export default class AppService {
         }
       }
   `, {
-    teamId,
-    userId
-  }).toPromise()
+      teamId,
+      userId
+    }).toPromise()
   }
 }

@@ -4,6 +4,7 @@ import { createHash } from 'crypto'
 import AppService from "../AppService";
 import { v4 as uuid } from 'uuid'
 import { logError } from "../logger";
+import { isUserVerifyEnabled } from "../utils";
 
 interface HasuraActionBody<Input> {
   session_variables: {
@@ -81,7 +82,7 @@ export async function signUpAction(req: AppReq, response: Response) {
           }
         }
       `, {
-        verified: process.env.VERIFIED_BY_DEFAULT === 'true' ? true : false,
+        verified: isUserVerifyEnabled ? false : true,
         email,
         password: encryptedPassword,
         username: defaultUserName // use email name as username
