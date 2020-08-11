@@ -75,7 +75,7 @@ export async function signUpAction(req: AppReq, response: Response) {
           insert_users_one(object: {
             email: $email,
             password: $password,
-            username: $usernamee,
+            username: $username,
             verified: $verified
           }) {
             email, id
