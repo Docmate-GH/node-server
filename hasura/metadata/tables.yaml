@@ -110,14 +110,15 @@
   - role: user
     permission:
       columns:
-      - id
-      - created_at
-      - updated_at
-      - slug
       - content
-      - title
+      - created_at
       - deleted_at
       - doc_id
+      - id
+      - index
+      - slug
+      - title
+      - updated_at
       filter:
         _and:
         - doc:
@@ -137,13 +138,14 @@
     permission:
       columns:
       - content
-      - slug
-      - title
       - created_at
       - deleted_at
-      - updated_at
       - doc_id
       - id
+      - index
+      - slug
+      - title
+      - updated_at
       filter:
         doc:
           team:

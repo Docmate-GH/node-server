@@ -49,6 +49,14 @@ export async function home(req: AppReq, res: Response) {
       where: { id: { _eq: $docId }, deleted_at: { _is_null: true } }
     ) {
      title, id, pages(
+      order_by: [
+        {
+          index: asc
+        },
+        {
+          created_at: asc
+        }
+      ],
        where: {
          deleted_at: { _is_null: true }
        }
