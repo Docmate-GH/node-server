@@ -70,16 +70,18 @@ export async function signUpAction(req: AppReq, response: Response) {
           id: string,
         }
       }>(`
-        mutation($email: String!, $password: String!, $username: String!) {
+        mutation($email: String!, $password: String!, $username: String!, $verified: Boolean!) {
           insert_users_one(object: {
             email: $email,
             password: $password,
-            username: $username
+            username: $usernamee,
+            verified: $verified
           }) {
             email, id
           }
         }
       `, {
+        verified: process.env.VERIFIED_BY_DEFAULT === 'true' ? true : false,
         email,
         password: encryptedPassword,
         username: defaultUserName // use email name as username

@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 import * as express from 'express'
 import * as path from 'path'
 
@@ -10,7 +12,6 @@ import * as fetch from 'node-fetch'
 import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from './handlers/actions'
 
 const Sentry = require('@sentry/node');
-require('dotenv').config()
 
 const isProd = process.env.NODE_ENV === 'production'
 

@@ -258,10 +258,13 @@
       - id
       - username
       filter:
-        _or:
-        - id:
-            _eq: X-Hasura-User-Id
-        - user_teams:
-            team:
-              master:
-                _eq: X-Hasura-User-Id
+        _and:
+        - _or:
+          - id:
+              _eq: X-Hasura-User-Id
+          - user_teams:
+              team:
+                master:
+                  _eq: X-Hasura-User-Id
+        - verified:
+            _eq: true

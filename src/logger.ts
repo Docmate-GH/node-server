@@ -4,12 +4,12 @@ const isSentryEnabled = process.env.SENTRY_DSN
 
 export const logError = (err, userId: string) => {
   if (isSentryEnabled) {
-    Sentry.withScope(scope => {
+    Sentry.withScope(function(scope) {
       scope.setLevel('error')
       scope.setUser({
-        id: userId
+        id: userId || 'guest'
       })
-      scope.captureException(err)
+      Sentry.captureException(err)
     })
   }
 }
