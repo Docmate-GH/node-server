@@ -1,6 +1,6 @@
 const isProd = process.env.NODE_ENV === 'production'
 
-if (!isProd) {
+if (process.env.READ_ENV === 'true') {
   require('dotenv').config()
 }
 

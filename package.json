@@ -5,8 +5,7 @@
     "tsc": "tsc --watch",
     "dev": "READ_ENV=true node lib/index.js",
     "build": "rm -rf lib && tsc",
-    "console": "hasura console --project hasura",
-    "start": "NODE_ENV=production node lib/index.js"
+    "console": "hasura console --project hasura"
   },
   "devDependencies": {
     "@types/express": "^4.17.7",
