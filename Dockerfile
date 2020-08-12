@@ -8,7 +8,6 @@ VOLUME [ "/data" ]
 COPY . /server
 WORKDIR /server
 
-RUN npm i -g yarn
 RUN yarn
 
 RUN npm run build
