@@ -32,7 +32,7 @@ if (process.env.SENTRY_DSN) {
 
 const app = express()
 
-const PORT = isProd ? 80 : 3000
+const PORT = process.env.PORT || 3000
 
 const client = createClient({
   url: 'http://localhost:8080/v1/graphql',

@@ -21,7 +21,7 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: guest
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_JWT_SECRET: {"type": "HS256", "key": "my_jwt_secret"}
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "my_jwt_secret"}'
       ACTION_HANDLER_URL: "http://host.docker.internal:3000"
   docmate:
     image: djyde/docmate:latest
@@ -32,6 +32,5 @@ services:
     restart: always
     volumes:
       - ./data/docmate:/data
-    environment:
 
  
