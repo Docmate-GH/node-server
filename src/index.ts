@@ -1,4 +1,6 @@
-if(process.env.NODE_ENV !== 'production') {
+const isProd = process.env.NODE_ENV === 'production'
+
+if(!isProd) {
   require('dotenv').config()
 }
 
@@ -16,10 +18,7 @@ import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from
 import uploadController from './controllers/upload'
 import { imagePath, isProEnabled, uploadMiddleware, proPlanGuard } from './utils'
 
-
 const Sentry = require('@sentry/node');
-
-const isProd = process.env.NODE_ENV === 'production'
 
 export interface AppReq extends express.Request {
   // user?: User,
