@@ -5,7 +5,7 @@ import { ReadStream } from 'fs'
 import * as AliOSS from 'ali-oss'
 import { v4 as uuid } from 'uuid'
 export const isProEnabled = process.env.ENABLE_PRO === 'true'
-export const imagePath = process.env.IMAGES_PATH || path.resolve(__dirname, '../images')
+export const imagePath = process.env.IMAGES_PATH || '/data/images' // docker data
 
 export const useOSS = process.env.OSS_TYPE === 'aliyun'
 
