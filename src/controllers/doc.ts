@@ -41,6 +41,7 @@ export const home = ({
     doc: {
       title: string,
       id: string,
+      code_highlights: string[]
       pages: {
         id: string,
         title: string,
@@ -52,6 +53,7 @@ export const home = ({
     doc(
       where: { id: { _eq: $docId }, deleted_at: { _is_null: true } }
     ) {
+     code_highlights,
      title, id, pages(
       order_by: [
         {
@@ -88,7 +90,7 @@ export const home = ({
       title: doc.title,
       target: '#docute',
       sourcePath: getSourcePath(req),
-
+      highlight: doc.code_highlights,
       sidebar
     }
 

@@ -64,6 +64,7 @@
   - role: user
     permission:
       columns:
+      - code_highlights
       - default_page
       - title
       filter:
