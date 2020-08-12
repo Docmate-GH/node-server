@@ -27,6 +27,12 @@ npm run tsc
 npm run dev
 ```
 
-## TODO
+## ENV
 
-- [ ] env: JWT private key
+- SENTRY_DSN
+- SENDGRID_API_KEY
+- IMAGES_PATH
+- ENABLE_PRO
+- ENABLE_USER_VERIFY
+- SUBDOMAIN_DOC
+- READ_ENV

@@ -6,9 +6,9 @@ import * as AliOSS from 'ali-oss'
 import { v4 as uuid } from 'uuid'
 export const isProEnabled = process.env.ENABLE_PRO === 'true'
 export const imagePath = process.env.IMAGES_PATH || '/data/images' // docker data
-
+export const docSubdomain = process.env.SUBDOMAIN_DOC
 export const useOSS = process.env.OSS_TYPE === 'aliyun'
-
+export const readENV = process.env.READ_ENV === 'true'
 import * as MAO from 'multer-aliyun-oss'
 import { logError } from './logger'
 import { Response } from 'express'

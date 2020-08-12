@@ -27,17 +27,19 @@
                 schema: public
                 name: users
       columns:
-      - id
+      - code_highlights
       - created_at
-      - updated_at
       - deleted_at
-      - title
+      - id
       - team_id
+      - title
+      - updated_at
       backend_only: false
   select_permissions:
   - role: user
     permission:
       columns:
+      - code_highlights
       - created_at
       - default_page
       - deleted_at

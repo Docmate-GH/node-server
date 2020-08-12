@@ -3,7 +3,7 @@
   "description": "An elegant wiki for Chinese content",
   "scripts": {
     "tsc": "tsc --watch",
-    "dev": "node lib/index.js",
+    "dev": "READ_ENV=true node lib/index.js",
     "build": "rm -rf lib && tsc",
     "console": "hasura console --project hasura",
     "start": "NODE_ENV=production node lib/index.js"
@@ -36,6 +36,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "vhost": "^3.0.2"
   }
 }

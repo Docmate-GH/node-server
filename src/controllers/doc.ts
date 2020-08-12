@@ -5,7 +5,11 @@ import * as path from 'path'
 type DocHoemParams = {
   docId: string
 }
-export async function home(req: AppReq, res: Response) {
+export const home = ({
+  getSourcePath
+}: {
+  getSourcePath: (req: AppReq) => string
+}) => async (req: AppReq, res: Response) => {
 
   const { docId } = req.params as DocHoemParams
 
@@ -83,7 +87,7 @@ export async function home(req: AppReq, res: Response) {
     const docuteParams = {
       title: doc.title,
       target: '#docute',
-      sourcePath: `/docs/${doc.id}`,
+      sourcePath: getSourcePath(req),
 
       sidebar
     }
