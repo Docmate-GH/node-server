@@ -1,6 +1,6 @@
 const isProd = process.env.NODE_ENV === 'production'
 
-if(!isProd) {
+if (!isProd) {
   require('dotenv').config()
 }
 
@@ -74,6 +74,13 @@ app.use((req: AppReq, res, next) => {
 
 if (docSubdomain) {
   const docsApp = express()
+  docsApp.set('views', path.resolve(__dirname, '../views'))
+  docsApp.use(require('body-parser').json())
+  docsApp.use(require('body-parser').urlencoded({ extended: false }))
+  nunjucks.configure('views', {
+    express: docsApp,
+    autoescape: false
+  })
   docsApp.get('/:docId', doc.home({
     getSourcePath(req) {
       return `/${req.params.docId}`
