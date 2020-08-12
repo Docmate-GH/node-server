@@ -65,17 +65,6 @@ app.use(require('morgan')(isProd ? 'combined' : 'dev'))
 app.use('/static', express.static(path.resolve(__dirname, '../static')))
 app.use('/images', express.static(imagePath))
 
-if (docSubdomain) {
-  const docsApp = express()
-  app.get('/:docId', doc.home({
-    getSourcePath(req) {
-      return `/${req.params.docId}`
-    }
-  }))
-  app.get('/:docId/:fileName', doc.renderFile)
-
-  app.use(vhost(path.parse(docSubdomain).base, docsApp))
-}
 
 app.use((req: AppReq, res, next) => {
   // req.user = FAKE_USER
@@ -83,11 +72,24 @@ app.use((req: AppReq, res, next) => {
   next()
 })
 
+if (docSubdomain) {
+  const docsApp = express()
+  docsApp.get('/:docId', doc.home({
+    getSourcePath(req) {
+      return `/${req.params.docId}`
+    }
+  }))
+  docsApp.get('/:docId/:fileName', doc.renderFile)
+
+  app.use(vhost(path.parse(docSubdomain).base, docsApp))
+}
+
 app.get('/login', (req, res) => {
   res.send('hi')
 })
 
 app.get('/docs/:docId', (req, res, next) => {
+  console.log('ss')
   if (docSubdomain) {
     res.redirect(`${docSubdomain}/${req.params.docId}`)
   } else {
