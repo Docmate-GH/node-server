@@ -161,7 +161,7 @@ export async function signinAction(req: AppReq, response: Response) {
       if (await req.appService.comparePassword(password, user.password)) {
 
         response.json({
-          token: req.appService.getJWT({
+          token: req.appService.getHasuraJWT({
             name: user.username
           }, {
             'x-hasura-user-id': user.id,

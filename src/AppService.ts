@@ -8,6 +8,8 @@ export default class AppService {
   constructor(public client: Client) {
   }
 
+  jwtPrivateKey = (JSON.parse(process.env.DOCMATE_JWT_SECRET!)).key
+
   async encryptPassword(psw: string) {
     const saltRounds = 10
     return await bcrypt.hash(psw, saltRounds) as string
@@ -19,24 +21,22 @@ export default class AppService {
   }
 
 
-  getJWT(body, claims) {
-    const privateKey = (JSON.parse(process.env.DOCMATE_JWT_SECRET!)).key
+  genJWT(body) {
+    return jwt.sign(body, this.jwtPrivateKey)
+  }
 
-    const token = jwt.sign({
+  parseJWT(jwtString: string) {
+    return jwt.verify(jwtString, this.jwtPrivateKey)
+  }
+
+  getHasuraJWT(body, claims) {
+    return this.genJWT({
       ...body,
       'https://hasura.io/jwt/claims': {
         'x-hasura-allowed-roles': ['user'],
         ...claims
       },
-    }, privateKey)
-
-    return token
-  }
-
-  parseJWT(jwtString: string) {
-    const privateKey = (JSON.parse(process.env.DOCMATE_JWT_SECRET!)).key
-
-    return jwt.verify(jwtString, privateKey)
+    })
   }
 
   createTeam(title: string, masterUserId: string, isPersonal = false) {

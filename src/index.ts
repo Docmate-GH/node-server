@@ -17,6 +17,7 @@ import { signUpAction, signinAction, createTeam, joinTeam, revokeInviteId } from
 import * as vhost from 'vhost'
 import uploadController from './controllers/upload'
 import { imagePath, isProEnabled, uploadMiddleware, proPlanGuard, docSubdomain } from './utils'
+import { signIn, signUp, signOut } from './controllers/sign'
 
 const Sentry = require('@sentry/node');
 
@@ -117,6 +118,11 @@ app.post('/handler/actions/joinTeam', joinTeam)
 app.post('/handler/actions/revokeInviteId', revokeInviteId)
 
 app.post('/api/v1/upload', proPlanGuard, uploadMiddleware.single('image'), uploadController)
+
+app.post('/api/v1/signIn', signIn)
+app.post('/api/v1/signUp', signUp)
+app.post('/api/v1/signOut', signOut)
+
 
 app.get('*', async (req: AppReq, res) => {
   res.render('index.html')
