@@ -6,7 +6,7 @@ RUN mkdir /apps
 
 COPY . /apps/server
 
-RUN git clone https://djyde:${TOKEN}@github.com/Docmate-GH/web.git
+RUN git clone git@github.com:Docmate-GH/web.git
 
 WORKDIR /apps/web
 
