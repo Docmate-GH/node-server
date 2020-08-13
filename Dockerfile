@@ -1,8 +1,5 @@
 FROM node:12
 
-ARG TOKEN
-ENV TOKEN $TOKEN
-
 EXPOSE 3000/tcp
 
 RUN mkdir /apps
