@@ -1,58 +1,37 @@
 import { AppReq } from "..";
 import { Response } from "express";
 import * as path from 'path'
+import { logError } from "../logger";
 
-type DocHoemParams = {
-  docId: string
+type DocControllerCommonParams = {
+  docId
 }
-export const home = ({
-  getSourcePath
-}: {
-  getSourcePath: (req: AppReq) => string
-}) => async (req: AppReq, res: Response) => {
 
-  const { docId } = req.params as DocHoemParams
-
-  let defaultPage = null as null | string
-
-  const getDocResult = await req.appService.client.query<{
-    doc_by_pk: {
-      default_page?: string
-    }
-  }>(
-    `
-    query($docId: uuid!) {
-      doc_by_pk(id: $docId) {
-        default_page
-      }
-    }
-    `, { docId }
-  ).toPromise()
-
-  if (!getDocResult.error) {
-    if (getDocResult.data?.doc_by_pk.default_page) {
-      defaultPage = getDocResult.data?.doc_by_pk.default_page
-    }
-  } else {
-    // TODO: getdoc result error
-  }
-
-  const result = await req.appService.client.query<{
-    doc: {
-      title: string,
+type DocResult = {
+  doc: {
+    title: string,
+    id: string,
+    code_highlights: string[],
+    visibility: 'public' | 'private',
+    default_page?: string,
+    pages: {
       id: string,
-      code_highlights: string[]
-      pages: {
-        id: string,
-        title: string,
-        slug: string
-      }[]
+      title: string,
+      slug: string
     }[]
-  }>(`
+  }[]
+}
+
+export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
+  const { docId } = req.params
+
+  const getDocResult = await req.appService.client.query<DocResult>(`
   query($docId: uuid!) {
     doc(
       where: { id: { _eq: $docId }, deleted_at: { _is_null: true } }
     ) {
+    visibility,
+    default_page,
      code_highlights,
      title, id, pages(
       order_by: [
@@ -75,68 +54,133 @@ export const home = ({
     docId
   }).toPromise()
 
-  const doc = result.data?.doc[0]
-
-  if (doc) {
-
-    const sidebar = doc.pages.filter(page => page.slug !== defaultPage).map(page => {
-      return {
-        title: page.title,
-        link: '/' + page.slug
-      }
-    })
-
-    const docuteParams = {
-      title: doc.title,
-      target: '#docute',
-      sourcePath: getSourcePath(req),
-      highlight: doc.code_highlights,
-      sidebar
-    }
-
-    res.render('docute.html', {
-      params: docuteParams
-    })
-
+  if (getDocResult.error) {
+    logError(getDocResult.error, 'docGuard')
+    res.status(500).send('')
   } else {
-    res.status(404)
-    res.json({
-      message: 'not found'
-    })
+    if (getDocResult.data!.doc.length > 0) {
+      const doc = getDocResult.data!.doc[0]
+
+      if (doc.visibility === 'public') {
+        res.locals.doc = doc
+        next()
+      } else if (doc.visibility === 'private') {
+        const jwtToken = req.cookies['__DOCMATE__DOC_TOKEN__']
+
+        if (jwtToken) {
+          try {
+            const parsed = req.appService.parseJWT(jwtToken)
+            const userId = parsed.userId
+
+            // find if a member
+            const findMember = await req.appService.client.query<{
+              doc_by_pk: {
+                team: {
+                  team_users: {
+                    user_id
+                  }[]
+                }
+              }
+            }>(`
+              query ($docId: uuid!, $userId: uuid!) {
+                doc_by_pk(id: $docId) {
+                  team {
+                    team_users(where: {
+                      user_id: {_eq: $userId}
+                    }) {
+                      user_id
+                    }
+                  }
+                }
+              }
+      `, {
+              docId,
+              userId
+            }).toPromise()
+
+            if (findMember.error) {
+              throw findMember.error
+            } else {
+              if (findMember.data!.doc_by_pk.team.team_users.length > 0) {
+                res.locals.doc = doc
+                next()
+              } else {
+                res.status(403)
+                return res.send(`It's a private doc`)
+              }
+            }
+          } catch (e) {
+            logError(e, 'docGuard')
+            res.status(403)
+            return res.send('Please sign in first')
+          }
+
+        } else {
+          res.status(403)
+          return res.send('Please sign in first')
+        }
+      } else {
+        const error = new Error(`Unknown visibility type: ${doc.visibility}`)
+        logError(error, 'docGuard')
+        res.status(500)
+        return res.send('Doc not found')
+      }
+
+    } else {
+      res.status(404)
+      return res.send('Doc not found')
+    }
   }
+}
+
+type DocHomeParams = {
+} & DocControllerCommonParams
+export const home = ({
+  getSourcePath
+}: {
+  getSourcePath: (req: AppReq) => string
+}) => async (req: AppReq, res: Response) => {
+
+  const { docId } = req.params as DocHomeParams
+
+  const doc = res.locals.doc as DocResult['doc'][0]
+
+  let defaultPage = doc.default_page || null
+
+  const sidebar = doc.pages.filter(page => page.slug !== defaultPage).map(page => {
+    return {
+      title: page.title,
+      link: '/' + page.slug
+    }
+  })
+
+  const docuteParams = {
+    title: doc.title,
+    target: '#docute',
+    sourcePath: getSourcePath(req),
+    highlight: doc.code_highlights,
+    sidebar
+  }
+
+  res.render('docute.html', {
+    params: docuteParams
+  })
 
 }
 
 type RenderFileParams = {
-  docId: string
   fileName: string
-}
+} & DocControllerCommonParams
 export async function renderFile(req: AppReq, res: Response) {
   const params = req.params as RenderFileParams
 
   let pageSlug = path.basename(params.fileName, '.md')
 
-  if (pageSlug === 'README') {
-    const getDocResult = await req.appService.client.query<{
-      doc_by_pk: {
-        default_page?: string
-      }
-    }>(
-      `
-      query($docId: uuid!) {
-        doc_by_pk(id: $docId) {
-          default_page
-        }
-      }
-      `, { docId: params.docId }
-    ).toPromise()
+  const doc = res.locals.doc as DocResult['doc'][0]
 
-    if (!getDocResult.error) {
-      if (getDocResult.data?.doc_by_pk.default_page) {
-        pageSlug = getDocResult.data.doc_by_pk.default_page
-      }
-    } else {
-      // TODO: getdoc result error
+  if (pageSlug === 'README') {
+    if (doc.default_page) {
+      pageSlug = doc.default_page
     }
   }
 
@@ -146,15 +190,9 @@ export async function renderFile(req: AppReq, res: Response) {
       slug: string,
       content: string,
       title: string
-    },
-    doc_by_pk: {
-      default_page: string
     }
   }>(`
     query($docId: uuid!, $pageSlug: String!) {
-      doc_by_pk(id: $docId) {
-        default_page
-      },
       page(
         where: {
           deleted_at: { _is_null: true },

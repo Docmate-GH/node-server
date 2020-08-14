@@ -47,6 +47,7 @@
       - team_id
       - title
       - updated_at
+      - visibility
       filter:
         _and:
         - deleted_at:
@@ -67,6 +68,7 @@
       - code_highlights
       - default_page
       - title
+      - visibility
       filter:
         team:
           team_users:

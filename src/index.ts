@@ -96,7 +96,7 @@ app.get('/login', (req, res) => {
   res.send('hi')
 })
 
-app.get('/docs/:docId', (req, res, next) => {
+app.get('/docs/:docId', doc.docVisibilityGuard, (req, res, next) => {
   console.log('ss')
   if (docSubdomain) {
     res.redirect(`${docSubdomain}/${req.params.docId}`)
@@ -109,7 +109,7 @@ app.get('/docs/:docId', (req, res, next) => {
   }
 }))
 
-app.get('/docs/:docId/:fileName', doc.renderFile)
+app.get('/docs/:docId/:fileName', doc.docVisibilityGuard, doc.renderFile)
 
 app.post('/handler/actions/signUp', signUpAction)
 app.post('/handler/actions/signIn', signinAction)

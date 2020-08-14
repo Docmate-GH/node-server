@@ -3,6 +3,49 @@ import { Response, CookieOptions } from "express"
 import { isUserVerifyEnabled } from "../utils"
 import { logError } from "../logger"
 import { createHash } from "crypto"
+import { userInfo } from "os"
+
+const generateCookiesAndSendResult = (req: AppReq, response: Response, {
+  user
+}: {
+  user: {
+    username: string,
+    id: string,
+    email: string,
+    avatar: string
+  }
+}) => {
+  // success
+  const hasuraJWT = req.appService.getHasuraJWT({
+    name: user.username
+  }, {
+    'x-hasura-user-id': user.id,
+    'x-hasura-default-role': "user",
+  })
+  const jwtForDoc = req.appService.genJWT({
+    userId: user.id
+  })
+  response.cookie('__DOCMATE__TOKEN__', hasuraJWT, {
+    maxAge: 3600000 * 24 * 7,
+  })
+
+  const DOC_TOKEN = {
+    maxAge: 3600000 * 24 * 7,
+  } as CookieOptions
+  if (process.env.DOC_COOKIES_DOMAIN) {
+    // TODO: should not hard code
+    DOC_TOKEN.domain = process.env.DOC_COOKIES_DOMAIN
+  }
+  response.cookie('__DOCMATE__DOC_TOKEN__', jwtForDoc, DOC_TOKEN)
+
+  response.json({
+    message: 'success',
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    avatar: user.email
+  })
+}
 
 export async function signUp(req: AppReq, response: Response) {
 
@@ -87,31 +130,15 @@ export async function signUp(req: AppReq, response: Response) {
           const joinTeamResult = await req.appService.joinTeam(createTeamResult.data!.insert_teams_one.id, createUserResult.data!.insert_users_one.id)
 
           if (!joinTeamResult.error) {
+            const user = createUserResult.data!.insert_users_one
             // success
-            const hasuraJWT = req.appService.getHasuraJWT({
-              name: createUserResult.data?.insert_users_one.username
-            }, {
-              'x-hasura-user-id': createUserResult.data?.insert_users_one.id,
-              'x-hasura-default-role': "user",
-            })
-            const jwtForDoc = req.appService.genJWT({
-              userId: createUserResult.data?.insert_users_one.id
-            })
-            response.cookie('__DOCMATE__TOKEN__', hasuraJWT, {
-              maxAge: 3600000 * 24 * 7,
-            })
-
-            const DOC_TOKEN = {
-              maxAge: 3600000 * 24 * 7,
-            } as CookieOptions
-            if (process.env.SUBDOMAIN_DOC) {
-              // TODO: should not hard code
-              DOC_TOKEN.domain = 'docmate.io'
-            }
-            response.cookie('__DOCMATE__DOC_TOKEN__', jwtForDoc, DOC_TOKEN)
-
-            response.json({
-              message: 'success'
+            generateCookiesAndSendResult(req, response, {
+              user: {
+                avatar: user.email,
+                id: user.id,
+                username: user.username,
+                email: user.email
+              }
             })
           } else {
             logError(joinTeamResult.error, 'signUp')
@@ -168,34 +195,13 @@ export async function signIn(req: AppReq, response: Response) {
       const user = findUserByEmailResult.data!.users[0]
       if (await req.appService.comparePassword(password, user.password)) {
         // success
-        const hasuraJWT = req.appService.getHasuraJWT({
-          name: user.username
-        }, {
-          'x-hasura-user-id': user.id,
-          'x-hasura-default-role': "user",
-        })
-        const jwtForDoc = req.appService.genJWT({
-          userId: user.id
-        })
-        response.cookie('__DOCMATE__TOKEN__', hasuraJWT, {
-          maxAge: 3600000 * 24 * 7,
-        })
-
-        const DOC_TOKEN = {
-          maxAge: 3600000 * 24 * 7,
-        } as CookieOptions
-        if (process.env.SUBDOMAIN_DOC) {
-          // TODO: should not hard code
-          DOC_TOKEN.domain = 'docmate.io'
-        }
-        response.cookie('__DOCMATE__DOC_TOKEN__', jwtForDoc, DOC_TOKEN)
-
-        response.json({
-          message: 'success',
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          avatar: user.email
+        generateCookiesAndSendResult(req, response, {
+          user: {
+            avatar: user.email,
+            id: user.id,
+            username: user.username,
+            email: user.email
+          }
         })
       } else {
         // password not correct
