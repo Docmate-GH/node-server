@@ -6,6 +6,8 @@ RUN mkdir /apps
 
 COPY . /apps/server
 
+WORKDIR /apps
+
 RUN git clone https://github.com/Docmate-GH/web.git
 
 WORKDIR /apps/web
