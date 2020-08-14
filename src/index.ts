@@ -124,7 +124,13 @@ app.post('/api/v1/signIn', signIn)
 app.post('/api/v1/signUp', signUp)
 app.post('/api/v1/signOut', signOut)
 
-app.get('/api/v1/auth/github', github)
+if (process.env.OAUTH === 'true') {
+  app.get('/api/v1/auth/github', github)
+
+  app.get('/login/github', (req, res) => {
+    res.redirect(`https://github.com/login/oauth/authorize?client_id=${process.env.GH_CLIENT_ID}&redirect_uri=${process.env.GH_REDIRECT_URI}&scope=${process.env.GH_SCOPE}`)
+  })
+}
 
 app.get('*', async (req: AppReq, res) => {
   res.render('index.html')

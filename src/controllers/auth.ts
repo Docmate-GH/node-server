@@ -82,7 +82,6 @@ export const github = async (req: AppReq, response: Response) => {
 
   } catch (e) {
     logError(e, 'Sign in failed')
-    console.log(e)
     response.json({
       message: 'Sign in failed'
     })
