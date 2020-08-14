@@ -2,6 +2,8 @@ import { Client } from '@urql/core'
 import * as bcrypt from 'bcrypt'
 
 import * as jwt from 'jsonwebtoken'
+import { isUserVerifyEnabled } from './utils'
+import { logError } from './logger'
 
 export default class AppService {
 
@@ -99,5 +101,116 @@ export default class AppService {
       teamId,
       userId
     }).toPromise()
+  }
+
+  async createUser(email: string, password: string, events: {
+    onExist: (user: {
+      id: string,
+      email: string,
+      avatar: string,
+      username: string,
+      auth_service: string
+    }) => void,
+    onCreateSuccess: (user: {
+      avatar: string,
+      id: string,
+      username: string,
+      email: string,
+    }) => void,
+    onFailed: (err: any) => void
+  }, options?: {
+    username?: string,
+    auth_service?: string
+  }) {
+    // find exist 
+    const findExistUserResult = await this.client.query<{
+      users: {
+        id: string,
+        email: string,
+        username: string,
+        avatar: string,
+        auth_service: string
+      }[]
+    }>(`
+      query($email: String) {
+        users(
+          where: {
+            deleted_at: { _is_null: true },
+            email: { _eq: $email }
+          }
+        ) {
+          id, email, username, avatar, auth_service
+        }
+      }
+    `, { email }).toPromise()
+
+    if (findExistUserResult.data) {
+      if (findExistUserResult.data.users.length > 0) {
+        events.onExist(findExistUserResult.data.users[0])
+      } else {
+        const encryptedPassword = await this.encryptPassword(password)
+
+        const defaultUserName = options?.username || email.split('@')[0]
+
+        const createUserResult = await this.client.query<{
+          insert_users_one: {
+            email: string,
+            id: string,
+            username: string,
+            avatar: string
+          }
+        }>(`
+          mutation($email: String!, $password: String!, $username: String!, $verified: Boolean!, $avatar: String, $authService: String) {
+            insert_users_one(object: {
+              email: $email,
+              password: $password,
+              username: $username,
+              verified: $verified,
+              avatar: $avatar,
+              auth_service: $auth_service
+            }) {
+              email, id, username, avatar
+            }
+          }
+        `, {
+          verified: isUserVerifyEnabled ? false : true,
+          email,
+          avatar: this.createGravatar(email),
+          password: encryptedPassword,
+          username: defaultUserName // use email name as username
+        }).toPromise()
+
+        if (!createUserResult.error) {
+
+          // create team for user
+
+          const createTeamResult = await this.createTeam(defaultUserName, createUserResult.data!.insert_users_one.id, true)
+
+          if (!createTeamResult.error) {
+
+            // join team
+            const joinTeamResult = await this.joinTeam(createTeamResult.data!.insert_teams_one.id, createUserResult.data!.insert_users_one.id)
+
+            if (!joinTeamResult.error) {
+              const user = createUserResult.data!.insert_users_one
+              // success
+              events.onCreateSuccess({
+                avatar: user.avatar,
+                id: user.id,
+                username: user.username,
+                email: user.email
+              })
+            } else {
+              events.onFailed(joinTeamResult.error)
+            }
+          } else {
+            events.onFailed(createTeamResult.error)
+          }
+
+        } else {
+          events.onFailed(createUserResult.error)
+        }
+      }
+    }
   }
 }

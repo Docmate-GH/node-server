@@ -3,7 +3,7 @@ import { Response, CookieOptions } from "express"
 import { isUserVerifyEnabled } from "../utils"
 import { logError } from "../logger"
 
-const generateCookiesAndSendResult = (req: AppReq, response: Response, {
+export const generateCookiesAndSendResult = (req: AppReq, response: Response, {
   user
 }: {
   user: {
@@ -12,7 +12,7 @@ const generateCookiesAndSendResult = (req: AppReq, response: Response, {
     email: string,
     avatar: string
   }
-}) => {
+}, needResponse = true) => {
   // success
   const hasuraJWT = req.appService.getHasuraJWT({
     name: user.username
@@ -29,6 +29,7 @@ const generateCookiesAndSendResult = (req: AppReq, response: Response, {
 
   const DOC_TOKEN = {
     maxAge: 3600000 * 24 * 7,
+    encode: String
   } as CookieOptions
   if (process.env.DOC_COOKIES_DOMAIN) {
     // TODO: should not hard code
@@ -36,13 +37,20 @@ const generateCookiesAndSendResult = (req: AppReq, response: Response, {
   }
   response.cookie('__DOCMATE__DOC_TOKEN__', jwtForDoc, DOC_TOKEN)
 
-  response.json({
-    message: 'success',
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    avatar: user.avatar
-  })
+  response.cookie('__DOCMATE__USER_ID__', user.id, DOC_TOKEN)
+  response.cookie('__DOCMATE__USER_EMAIL__', user.email, DOC_TOKEN)
+  response.cookie('__DOCMATE__USER_AVATAR__', user.avatar, DOC_TOKEN)
+  response.cookie('__DOCMATE__USER_USERNAME__', user.username, DOC_TOKEN)
+
+  if (needResponse) {
+    response.json({
+      message: 'success',
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar
+    })
+  }
 }
 
 export async function signUp(req: AppReq, response: Response) {

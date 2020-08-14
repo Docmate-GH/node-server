@@ -18,6 +18,7 @@ import * as vhost from 'vhost'
 import uploadController from './controllers/upload'
 import { imagePath, isProEnabled, uploadMiddleware, proPlanGuard, docSubdomain } from './utils'
 import { signIn, signUp, signOut } from './controllers/sign'
+import { github } from './controllers/auth'
 
 const Sentry = require('@sentry/node');
 
@@ -123,6 +124,7 @@ app.post('/api/v1/signIn', signIn)
 app.post('/api/v1/signUp', signUp)
 app.post('/api/v1/signOut', signOut)
 
+app.get('/api/v1/auth/github', github)
 
 app.get('*', async (req: AppReq, res) => {
   res.render('index.html')

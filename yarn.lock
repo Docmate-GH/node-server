@@ -201,7 +201,7 @@ agentkeepalive@^3.4.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ali-oss@^6.10.0, ali-oss@^6.6.0:
+ali-oss@^6.10.0:
   version "6.10.0"
   resolved "https://registry.yarnpkg.com/ali-oss/-/ali-oss-6.10.0.tgz#9b6d61586259851d3f7e33ae9e2ed58e77e5257e"
   integrity sha512-kWguelLe4QZCvqisN3i9i+kyaG2JCj+4AqXbc+HKJ3b4WYwkn2hS9INJHtrUSlo95yn9FKSNXwTAfLMrXyQlnA==
@@ -296,7 +296,7 @@ ast-types@0.x.x:
   resolved "https://registry.yarnpkg.com/ast-types/-/ast-types-0.13.3.tgz#50da3f28d17bdbc7969a3a2d83a0e4a72ae755a7"
   integrity sha512-XTZ7xGML849LkQP86sWdQzfhwbt3YwIO6MqbX9mUNYY98VKaaVZP7YNNm70IpwecbkkxmfC5IYAzOQ/2p29zRA==
 
-axios@^0.19.0:
+axios@^0.19.0, axios@^0.19.2:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
   integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
@@ -1323,13 +1323,6 @@ ms@^2.0.0, ms@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
-
-multer-aliyun-oss@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/multer-aliyun-oss/-/multer-aliyun-oss-1.1.0.tgz#dcd4ab8f26db980ee159483f7257f61735b4c15c"
-  integrity sha512-I165MhnOfoFI6WJ4Lax9fM7x0ASPBxVTrAXc4X0sDnzWWUFtHo1loZZKoB8ukoSVMDoMRw84t+pcs4axqGiO5A==
-  dependencies:
-    ali-oss "^6.6.0"
 
 multer@^1.4.2:
   version "1.4.2"

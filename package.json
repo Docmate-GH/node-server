@@ -16,6 +16,7 @@
     "@sentry/node": "^5.20.1",
     "@urql/core": "^1.12.3",
     "ali-oss": "^6.10.0",
+    "axios": "^0.19.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
