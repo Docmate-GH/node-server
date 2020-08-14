@@ -20,6 +20,10 @@ export default class AppService {
     return matched
   }
 
+  createGravatar(email: string = '986699d2682d1fad58ee732e440c6c82') {
+    return `https://www.gravatar.com/avatar/${email}?d=identicon`
+  }
+
 
   genJWT(body) {
     return jwt.sign(body, this.jwtPrivateKey)

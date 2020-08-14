@@ -9,7 +9,6 @@ export const imagePath = process.env.IMAGES_PATH || '/data/images' // docker dat
 export const docSubdomain = process.env.SUBDOMAIN_DOC
 export const useOSS = process.env.OSS_TYPE === 'aliyun'
 export const readENV = process.env.READ_ENV === 'true'
-import * as MAO from 'multer-aliyun-oss'
 import { logError } from './logger'
 import { Response } from 'express'
 

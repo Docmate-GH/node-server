@@ -2,8 +2,6 @@ import { AppReq } from ".."
 import { Response, CookieOptions } from "express"
 import { isUserVerifyEnabled } from "../utils"
 import { logError } from "../logger"
-import { createHash } from "crypto"
-import { userInfo } from "os"
 
 const generateCookiesAndSendResult = (req: AppReq, response: Response, {
   user
@@ -43,7 +41,7 @@ const generateCookiesAndSendResult = (req: AppReq, response: Response, {
     id: user.id,
     username: user.username,
     email: user.email,
-    avatar: user.email
+    avatar: user.avatar
   })
 }
 
@@ -98,22 +96,25 @@ export async function signUp(req: AppReq, response: Response) {
         insert_users_one: {
           email: string,
           id: string,
-          username: string
+          username: string,
+          avatar: string
         }
       }>(`
-        mutation($email: String!, $password: String!, $username: String!, $verified: Boolean!) {
+        mutation($email: String!, $password: String!, $username: String!, $verified: Boolean!, $avatar: String) {
           insert_users_one(object: {
             email: $email,
             password: $password,
             username: $username,
-            verified: $verified
+            verified: $verified,
+            avatar: $avatar
           }) {
-            email, id, username
+            email, id, username, avatar
           }
         }
       `, {
         verified: isUserVerifyEnabled ? false : true,
         email,
+        avatar: req.appService.createGravatar(email),
         password: encryptedPassword,
         username: defaultUserName // use email name as username
       }).toPromise()
@@ -134,7 +135,7 @@ export async function signUp(req: AppReq, response: Response) {
             // success
             generateCookiesAndSendResult(req, response, {
               user: {
-                avatar: user.email,
+                avatar: user.avatar,
                 id: user.id,
                 username: user.username,
                 email: user.email
@@ -173,7 +174,8 @@ export async function signIn(req: AppReq, response: Response) {
       id: string,
       password: string,
       username: string,
-      email: string
+      email: string,
+      avatar: string
     }[]
   }>(`
     query($email: String!) {
@@ -183,7 +185,7 @@ export async function signIn(req: AppReq, response: Response) {
           deleted_at: { _is_null: true }
         }
       ) {
-        id, password, username, email
+        id, password, username, email, avatar
       }
     }
   `, {
@@ -197,7 +199,7 @@ export async function signIn(req: AppReq, response: Response) {
         // success
         generateCookiesAndSendResult(req, response, {
           user: {
-            avatar: user.email,
+            avatar: user.avatar,
             id: user.id,
             username: user.username,
             email: user.email
