@@ -36,7 +36,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 const client = createClient({
-  url: process.env.GQL_URL || 'http://localhost:8080/v1/graphql',
+  url: `http://${process.env.IP_ADDRESS || 'localhost'}:8080/v1/graphql`,
   fetch,
   requestPolicy: 'network-only',
   fetchOptions: {
