@@ -34,6 +34,7 @@
       - team_id
       - title
       - updated_at
+      - visibility
       backend_only: false
   select_permissions:
   - role: user
