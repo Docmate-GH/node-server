@@ -21,7 +21,7 @@ export default class AppService {
   }
 
   createGravatar(email: string = '986699d2682d1fad58ee732e440c6c82') {
-    return `https://www.gravatar.com/avatar/${email}?d=identicon`
+    return `//www.gravatar.com/avatar/${email}?d=identicon`
   }
 
 
