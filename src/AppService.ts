@@ -167,7 +167,7 @@ export default class AppService {
               username: $username,
               verified: $verified,
               avatar: $avatar,
-              auth_service: $auth_service
+              auth_service: $authService
             }) {
               email, id, username, avatar
             }
