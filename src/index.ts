@@ -82,12 +82,12 @@ if (docSubdomain) {
     express: docsApp,
     autoescape: false
   })
-  docsApp.get('/:docId', doc.home({
+  docsApp.get('/:docId', doc.docVisibilityGuard, doc.home({
     getSourcePath(req) {
       return `/${req.params.docId}`
     }
   }))
-  docsApp.get('/:docId/:fileName', doc.renderFile)
+  docsApp.get('/:docId/:fileName', doc.docVisibilityGuard, doc.renderFile)
 
   app.use(vhost(path.parse(docSubdomain).base, docsApp))
 }
