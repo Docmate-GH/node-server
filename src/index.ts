@@ -84,33 +84,32 @@ if (docSubdomain) {
     autoescape: false
   })
   docsApp.get('/:docId', doc.docVisibilityGuard, doc.home({
-    getSourcePath(req) {
-      return `/${req.params.docId}`
+    getSourcePath(req, template: string) {
+      return `/${req.params.docId}/files/${template}`
     }
   }))
-  docsApp.get('/:docId/:fileName', doc.docVisibilityGuard, doc.renderFile)
+
+  app.get('/docs/:docId/files/docute/:fileName', doc.docVisibilityGuard, doc.renderDocuteFile)
+  app.get('/docs/:docId/files/docsify/:fileName', doc.docVisibilityGuard, doc.renderDocsifyFile)
 
   app.use(vhost(path.parse(docSubdomain).base, docsApp))
 }
 
-app.get('/login', (req, res) => {
-  res.send('hi')
-})
-
 app.get('/docs/:docId', doc.docVisibilityGuard, (req, res, next) => {
-  console.log('ss')
   if (docSubdomain) {
     res.redirect(`${docSubdomain}/${req.params.docId}`)
   } else {
     next()
   }
 }, doc.home({
-  getSourcePath(req) {
-    return `/docs/${req.params.docId}`
+  getSourcePath(req, template: string) {
+    return `/docs/${req.params.docId}/files/${template}`
   }
 }))
 
-app.get('/docs/:docId/:fileName', doc.docVisibilityGuard, doc.renderFile)
+
+app.get('/docs/:docId/files/docute/:fileName', doc.docVisibilityGuard, doc.renderDocuteFile)
+app.get('/docs/:docId/files/docsify/:fileName', doc.docVisibilityGuard, doc.renderDocsifyFile)
 
 app.post('/handler/actions/signUp', signUpAction)
 app.post('/handler/actions/signIn', signinAction)

@@ -2,7 +2,7 @@ import { AppReq } from "..";
 import { Response } from "express";
 import * as path from 'path'
 import { logError } from "../logger";
-
+import { validate } from 'uuid'
 type DocControllerCommonParams = {
   docId
 }
@@ -14,6 +14,7 @@ type DocResult = {
     code_highlights: string[],
     visibility: 'public' | 'private',
     default_page?: string,
+    template: string
     pages: {
       id: string,
       title: string,
@@ -25,6 +26,10 @@ type DocResult = {
 export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
   const { docId } = req.params
 
+  if (!validate(docId)) {
+    res.status(404).send('')
+  }
+
   const getDocResult = await req.appService.client.query<DocResult>(`
   query($docId: uuid!) {
     doc(
@@ -33,6 +38,7 @@ export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
     visibility,
     default_page,
      code_highlights,
+     template,
      title, id, pages(
       order_by: [
         {
@@ -133,18 +139,11 @@ export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
   }
 }
 
-type DocHomeParams = {
-} & DocControllerCommonParams
-export const home = ({
-  getSourcePath
+function renderDocute(doc: DocResult['doc'][0], req: AppReq, res: Response, {
+  sourcePath
 }: {
-  getSourcePath: (req: AppReq) => string
-}) => async (req: AppReq, res: Response) => {
-
-  const { docId } = req.params as DocHomeParams
-
-  const doc = res.locals.doc as DocResult['doc'][0]
-
+  sourcePath
+}) {
   let defaultPage = doc.default_page || null
 
   const sidebar = doc.pages.filter(page => page.slug !== defaultPage).map(page => {
@@ -157,7 +156,7 @@ export const home = ({
   const docuteParams = {
     title: doc.title,
     target: '#docute',
-    sourcePath: getSourcePath(req),
+    sourcePath,
     highlight: doc.code_highlights,
     sidebar
   }
@@ -165,13 +164,56 @@ export const home = ({
   res.render('docute.html', {
     params: docuteParams
   })
+}
 
+function renderDocsify(doc: DocResult['doc'][0], req: AppReq, res: Response, {
+  sourcePath
+}: {
+  sourcePath: string
+}) {
+
+  const docsifyParams = {
+    title: doc.title,
+    basePath: sourcePath,
+    loadSidebar: true,
+    name: doc.title
+  }
+
+  res.render('docsify.html', {
+    params: docsifyParams,
+    highlights: doc.code_highlights
+  })
+}
+
+export const home = ({
+  getSourcePath
+}: {
+  getSourcePath: (req: AppReq, template: string) => string
+}) => async (req: AppReq, res: Response) => {
+
+  const doc = res.locals.doc as DocResult['doc'][0]
+
+  switch (doc.template) {
+    case 'docute':
+      renderDocute(doc, req, res, {
+        sourcePath: getSourcePath(req, 'docute')
+      })
+      break
+    case 'docsify':
+      renderDocsify(doc, req, res, {
+        sourcePath: getSourcePath(req, 'docsify')
+      })
+      break
+    default:
+  }
+
+ 
 }
 
 type RenderFileParams = {
   fileName: string
 } & DocControllerCommonParams
-export async function renderFile(req: AppReq, res: Response) {
+export async function renderDocuteFile(req: AppReq, res: Response) {
   const params = req.params as RenderFileParams
 
   let pageSlug = path.basename(params.fileName, '.md')
@@ -190,7 +232,7 @@ export async function renderFile(req: AppReq, res: Response) {
       slug: string,
       content: string,
       title: string
-    }
+    }[]
   }>(`
     query($docId: uuid!, $pageSlug: String!) {
       page(
@@ -217,4 +259,60 @@ export async function renderFile(req: AppReq, res: Response) {
     res.send('Not found')
   }
 
+}
+
+export async function renderDocsifyFile(req: AppReq, res: Response) {
+  const params = req.params as RenderFileParams
+
+  let pageSlug = path.basename(params.fileName, '.md')
+
+  const doc = res.locals.doc as DocResult['doc'][0]
+
+  res.type('text/markdown')
+
+  if (pageSlug === '_sidebar') {
+    // render docsify sidebar
+    const sidebar = doc.pages.map(page => {
+      return `
+      * [${page.title}](${page.slug}.md)
+      `.trim()
+    }).join('\n')
+
+    res.send(sidebar)
+    return
+  }
+
+  if (pageSlug === 'README') {
+    if (doc.default_page) {
+      pageSlug = doc.default_page
+    }
+  }
+
+  const result = await req.appService.client.query<{
+    page: {
+      id: string,
+      slug: string,
+      content: string,
+      title: string
+    }[]
+  }>(`
+    query($docId: uuid!, $pageSlug: String!) {
+      page(
+        where: {
+          deleted_at: { _is_null: true },
+          doc_id: { _eq: $docId },
+          slug: { _eq: $pageSlug }
+        }
+      ) {
+        id, slug, content, title
+      }
+    }
+  `, {
+    docId: params.docId,
+    pageSlug
+  }).toPromise()
+
+  const page = result.data?.page[0]
+
+  res.send(page?.content)
 }
