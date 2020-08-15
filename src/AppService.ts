@@ -175,6 +175,7 @@ export default class AppService {
         `, {
           verified: isUserVerifyEnabled ? false : true,
           email,
+          authService: options?.auth_service,
           avatar: this.createGravatar(email),
           password: encryptedPassword,
           username: defaultUserName // use email name as username
