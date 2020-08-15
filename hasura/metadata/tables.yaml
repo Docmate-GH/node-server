@@ -32,6 +32,7 @@
       - deleted_at
       - id
       - team_id
+      - template
       - title
       - updated_at
       - visibility
@@ -46,6 +47,7 @@
       - deleted_at
       - id
       - team_id
+      - template
       - title
       - updated_at
       - visibility
@@ -68,6 +70,7 @@
       columns:
       - code_highlights
       - default_page
+      - template
       - title
       - visibility
       filter:
