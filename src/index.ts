@@ -89,8 +89,8 @@ if (docSubdomain) {
     }
   }))
 
-  app.get('/docs/:docId/files/docute/:fileName', doc.docVisibilityGuard, doc.renderDocuteFile)
-  app.get('/docs/:docId/files/docsify/:fileName', doc.docVisibilityGuard, doc.renderDocsifyFile)
+  app.get('/:docId/files/docute/:fileName', doc.docVisibilityGuard, doc.renderDocuteFile)
+  app.get('/:docId/files/docsify/:fileName', doc.docVisibilityGuard, doc.renderDocsifyFile)
 
   app.use(vhost(path.parse(docSubdomain).base, docsApp))
 }
