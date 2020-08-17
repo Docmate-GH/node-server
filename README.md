@@ -11,11 +11,27 @@ Contains:
 
 ## Build
 
+### Docker setup
+
+Create a `.env` file at root redirectory:
+
+```
+ACTION_HANDLER_URL=http://localhost:3000
+DOCMATE_JWT_SECRET=myadminsecretkey
+DOCMATE_HASURA_SECRET={"type": "HS256", "key": "6&#X6((t>:^v>CM3g5NYfY63Z4=KN4Hx"}
+IMAGES_PATH=/tmp
+```
+
+```bash
+docker-compose up -d
+```
+
+This creates a postgresql, hasura container.
+
+### Run Nodejs server
+
 ```bash
 yarn
-
-# run hasura in docker
-docker-compose up -d
 
 # open hasura console
 npm run console
@@ -26,19 +42,3 @@ npm run tsc
 # node server
 npm run dev
 ```
-
-## ENV
-
-### server
-
-- SENTRY_DSN
-- SENDGRID_API_KEY
-- ENABLE_PRO
-- ENABLE_USER_VERIFY
-- SUBDOMAIN_DOC
-- GQL_URL
-
-### EE
-
-- DOCMATE_HASURA_SECRET
-- DOCMATE_JWT_SECRET
