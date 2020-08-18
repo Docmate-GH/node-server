@@ -263,6 +263,7 @@
   - role: user
     permission:
       columns:
+      - auth_service
       - avatar
       - email
       - id
@@ -278,3 +279,13 @@
                   _eq: X-Hasura-User-Id
         - verified:
             _eq: true
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - username
+      filter:
+        _and:
+        - id:
+            _eq: X-Hasura-User-Id
+      check: null
