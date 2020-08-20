@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 import { isUserVerifyEnabled } from './utils'
 import { logError } from './logger'
+import { createHash } from 'crypto'
 
 export default class AppService {
 
@@ -23,7 +24,8 @@ export default class AppService {
   }
 
   createGravatar(email: string = '986699d2682d1fad58ee732e440c6c82') {
-    return `//www.gravatar.com/avatar/${email}?d=identicon`
+    const hash = createHash('md5').update(email.toLowerCase()).digest('hex')
+    return `//www.gravatar.com/avatar/${hash}?d=identicon`
   }
 
 
