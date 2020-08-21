@@ -15,10 +15,14 @@ type DocResult = {
     visibility: 'public' | 'private',
     default_page?: string,
     template: string
-    pages: {
+    directories: {
       id: string,
       title: string,
-      slug: string
+      pages: {
+        id: string,
+        title: string,
+        slug: string
+      }[]
     }[]
   }[]
 }
@@ -39,7 +43,8 @@ export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
     default_page,
      code_highlights,
      template,
-     title, id, pages(
+
+     title, id, directories(
       order_by: [
         {
           index: asc
@@ -52,7 +57,21 @@ export const docVisibilityGuard = async (req: AppReq, res: Response, next) => {
          deleted_at: { _is_null: true }
        }
      ) {
-        id, title, slug
+       title, id,
+        pages (order_by: [
+          {
+            index: asc
+          },
+          {
+            created_at: asc
+          }
+        ],
+         where: {
+           deleted_at: { _is_null: true }
+         }
+       ) {
+          id, title, slug
+        }
       }
     }
   }
@@ -146,10 +165,15 @@ function renderDocute(doc: DocResult['doc'][0], req: AppReq, res: Response, {
 }) {
   let defaultPage = doc.default_page || null
 
-  const sidebar = doc.pages.filter(page => page.slug !== defaultPage).map(page => {
+  const sidebar = doc.directories.map(directory => {
     return {
-      title: page.title,
-      link: '/' + page.slug
+      title: directory.title,
+      children: directory.pages.map(page => {
+        return {
+          title: page.title,
+          link: '/' + page.slug
+        }
+      })
     }
   })
 
@@ -207,7 +231,7 @@ export const home = ({
     default:
   }
 
- 
+
 }
 
 type RenderFileParams = {
@@ -272,19 +296,22 @@ export async function renderDocsifyFile(req: AppReq, res: Response) {
 
   if (pageSlug === '_sidebar') {
     // render docsify sidebar
-    const sidebar = doc.pages.map(page => {
-      return `
-      * [${page.title}](${page.slug}.md)
-      `.trim()
-    }).join('\n')
+    const sidebar = doc.directories.map(directory => {
+      const parent = `* ${directory.title}\n`
+      const children = directory.pages.map(page => {
+        return `  * [${page.title}](${page.slug}.md)`
+      }).join('\n')
+      return parent.concat(children)
+    }).join('\n').trim()
 
     res.send(sidebar)
     return
   }
 
   if (pageSlug === 'README') {
-    if (doc.default_page) {
-      pageSlug = doc.default_page
+    if (!doc.default_page) {
+      res.send('Home')
+      return
     }
   }
 
@@ -313,6 +340,5 @@ export async function renderDocsifyFile(req: AppReq, res: Response) {
   }).toPromise()
 
   const page = result.data?.page[0]
-
-  res.send(page?.content)
+  res.send(page?.content || 'No content')
 }
