@@ -1,11 +1,79 @@
 - table:
     schema: public
+    name: directory
+  object_relationships:
+  - name: doc
+    using:
+      foreign_key_constraint_on: doc_id
+  array_relationships:
+  - name: pages
+    using:
+      foreign_key_constraint_on:
+        column: directory_id
+        table:
+          schema: public
+          name: page
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        _and:
+        - doc:
+            team:
+              team_users:
+                user_id:
+                  _eq: X-Hasura-User-Id
+      columns:
+      - doc_id
+      - title
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - deleted_at
+      - doc_id
+      - id
+      - index
+      - title
+      filter:
+        _and:
+        - doc:
+            team:
+              team_users:
+                user_id:
+                  _eq: X-Hasura-User-Id
+        - deleted_at:
+            _is_null: true
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - index
+      - title
+      filter:
+        _and:
+        - doc:
+            team:
+              team_users:
+                user_id:
+                  _eq: X-Hasura-User-Id
+      check: null
+- table:
+    schema: public
     name: doc
   object_relationships:
   - name: team
     using:
       foreign_key_constraint_on: team_id
   array_relationships:
+  - name: directories
+    using:
+      foreign_key_constraint_on:
+        column: doc_id
+        table:
+          schema: public
+          name: directory
   - name: pages
     using:
       foreign_key_constraint_on:
@@ -88,6 +156,9 @@
     schema: public
     name: page
   object_relationships:
+  - name: directory
+    using:
+      foreign_key_constraint_on: directory_id
   - name: doc
     using:
       foreign_key_constraint_on: doc_id
@@ -122,6 +193,7 @@
       - content
       - created_at
       - deleted_at
+      - directory_id
       - doc_id
       - id
       - index
@@ -149,6 +221,7 @@
       - content
       - created_at
       - deleted_at
+      - directory_id
       - doc_id
       - id
       - index
