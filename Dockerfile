@@ -8,7 +8,7 @@ COPY . /apps/server
 
 WORKDIR /apps
 
-RUN git clone https://github.com/Docmate-GH/web.git
+RUN git clone https://github.com/Docmate-GH/dashboard.git web
 
 WORKDIR /apps/web
 
