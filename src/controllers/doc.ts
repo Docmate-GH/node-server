@@ -312,6 +312,8 @@ export async function renderDocsifyFile(req: AppReq, res: Response) {
     if (!doc.default_page) {
       res.send('Home')
       return
+    } else {
+      pageSlug = doc.default_page
     }
   }
 

@@ -49,6 +49,7 @@
   - role: user
     permission:
       columns:
+      - deleted_at
       - index
       - title
       filter:
@@ -169,22 +170,18 @@
         doc:
           team:
             team_users:
-              _exists:
-                _where:
-                  id:
-                    _eq: X-Hasura-User-Id
-                _table:
-                  schema: public
-                  name: users
+              user_id:
+                _eq: X-Hasura-User-Id
       columns:
       - content
-      - slug
-      - title
       - created_at
-      - deleted_at
-      - updated_at
+      - directory_id
       - doc_id
       - id
+      - index
+      - slug
+      - title
+      - updated_at
       backend_only: false
   select_permissions:
   - role: user
