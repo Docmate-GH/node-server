@@ -12,7 +12,6 @@ RUN git clone https://github.com/Docmate-GH/dashboard.git web
 
 WORKDIR /apps/web
 
-ENV DOC_DOMAIN=https://docs.docmate.io
 RUN yarn && npm run build
 RUN mv -f dist/index.html ../server/views/index.html && \
   cp -rf dist/* ../server/static
